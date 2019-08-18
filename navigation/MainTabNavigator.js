@@ -33,6 +33,10 @@ import ImageHeader from "../components/ImageHeader";
 import Home from "../screens/Home";
 import Subcategories from "../screens/Subcategories";
 import UserAds from "../screens/UserAds";
+import Filter from "../screens/Filter";
+import PickLocation from "../screens/PickLocation";
+import ImageView from "../screens/ImageView";
+import strings from "../localization/Strings";
 
 const chats = createStackNavigator({
 	Products: {
@@ -41,43 +45,22 @@ const chats = createStackNavigator({
 			header: null
 		}
 	},
-	Chats: {
-		screen: Chats,
+	AddProduct: {
+		screen: AddProduct,
 		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header
-					name="Все сообщения"
-					openDrawer={navigation.openDrawer}
-				/>
-			)
+			header: ({ navigation }) => <Header back name={strings.addAd} />
 		}
 	},
-	Chat: {
-		screen: Chat,
+	UserAds: {
+		screen: UserAds,
 		navigationOptions: {
-			header: null
+			header: ({ navigation }) => <Header back name={strings.userAds} />
 		}
 	},
 	Product: {
 		screen: Product,
 		navigationOptions: {
 			header: null
-		}
-	},
-	AddProduct: {
-		screen: AddProduct,
-		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name="Добавляем объявления" />
-			)
-		}
-	},
-	UserAds: {
-		screen: UserAds,
-		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name="Объявления пользователя" />
-			)
 		}
 	}
 });
@@ -104,25 +87,27 @@ const products = createStackNavigator({
 	AddProduct: {
 		screen: AddProduct,
 		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name="Добавляем объявления" />
-			)
+			header: ({ navigation }) => <Header back name={strings.addAd} />
 		}
 	},
 	UserAds: {
 		screen: UserAds,
 		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name="Объявления пользователя" />
-			)
+			header: ({ navigation }) => <Header back name={strings.userAds} />
 		}
 	},
 	Subcategories: {
 		screen: Subcategories,
 		navigationOptions: {
 			header: ({ navigation }) => (
-				<Header back name="Выберите субкатегорию" />
+				<Header back name={strings.chooseSubcategory} />
 			)
+		}
+	},
+	Chat: {
+		screen: Chat,
+		navigationOptions: {
+			header: null
 		}
 	}
 });
@@ -133,7 +118,7 @@ const favorites = createStackNavigator({
 	Favorites: {
 		screen: Favorites,
 		navigationOptions: {
-			header: ({ navigation }) => <Header name="Избранные объявления" />
+			header: ({ navigation }) => <Header name={strings.featuredAds} />
 		}
 	},
 	Product: {
@@ -148,27 +133,31 @@ const account = createStackNavigator({
 	Account: {
 		screen: Account,
 		navigationOptions: {
-			header: ({ navigation }) => <Header name="Настройки профиля" />
+			header: ({ navigation }) => (
+				<Header name={strings.profileSettings} />
+			)
 		}
 	},
 	Ads: {
 		screen: Ads,
 		navigationOptions: {
-			header: ({ navigation }) => <Header back name="Мои объявления" />
+			header: ({ navigation }) => (
+				<Header back name={strings.myAnnouncements} />
+			)
 		}
 	},
 	EditAds: {
 		screen: EditAds,
 		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name="Редактировать объявления" />
-			)
+			header: ({ navigation }) => <Header back name={strings.editAd} />
 		}
 	},
 	Payment: {
 		screen: Payment,
 		navigationOptions: {
-			header: ({ navigation }) => <Header back name="Пополнение счета" />
+			header: ({ navigation }) => (
+				<Header back name={"Пополнение счета"} />
+			)
 		}
 	},
 	Statistics: {
@@ -183,7 +172,7 @@ const services = createStackNavigator({
 	Services: {
 		screen: Services,
 		navigationOptions: {
-			header: ({ navigation }) => <Header name="Сервисы" />
+			header: ({ navigation }) => <Header name={strings.services} />
 		}
 	}
 });
@@ -236,20 +225,61 @@ account.navigationOptions = {
 		/>
 	)
 };
-export default createDrawerNavigator(
+export default createStackNavigator(
 	{
-		Tabs: createBottomTabNavigator(
-			{
-				ProductsTab: products,
-				ChatsTab: chats,
-				ServicesTab: services,
-				FavoritesTab: favorites,
-				AccountTab: account
-			},
-			{
-				tabBarComponent: TabBar
+		Rest: {
+			screen: createDrawerNavigator(
+				{
+					Tabs: createBottomTabNavigator(
+						{
+							ProductsTab: products,
+							ChatsTab: chats,
+							ServicesTab: services,
+							FavoritesTab: favorites,
+							AccountTab: account
+						},
+						{
+							tabBarComponent: TabBar,
+							tabBarOptions: {
+								keyboardHidesTabBar: true
+							}
+						}
+					)
+				},
+				{ contentComponent: DrawerContent, drawerType: "slide" }
+			),
+			navigationOptions: { header: null }
+		},
+		Filter: {
+			screen: Filter,
+			navigationOptions: {
+				header: null
 			}
-		)
+		},
+		PickLocation: {
+			screen: PickLocation,
+			navigationOptions: {
+				header: navigation => <Header back name={strings.address} />
+			}
+		},
+		ImageView: {
+			screen: ImageView,
+			navigationOptions: {
+				header: null
+			}
+		},
+		Chats: {
+			screen: Chats,
+			navigationOptions: {
+				header: ({ navigation }) => (
+					<Header
+						name={strings.allPosts}
+						back
+						openDrawer={navigation.openDrawer}
+					/>
+				)
+			}
+		}
 	},
-	{ contentComponent: DrawerContent, drawerType: "slide" }
+	{ mode: "modal" }
 );

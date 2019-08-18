@@ -6,6 +6,7 @@ import Colors from "../constants/Colors";
 import { populateMessages } from "../actions/thunk";
 import { connect } from "react-redux";
 import { routeChange } from "../actions/actions";
+import strings from "../localization/Strings";
 
 // const messages = [
 // 	{
@@ -46,7 +47,8 @@ class Chat extends Component {
 			routeChange({
 				...this.props.route,
 				getter_id: user.user_id,
-				chat_id: user.id
+				chat_id: user.id,
+				stay: true
 			})
 		);
 	}
@@ -57,7 +59,7 @@ class Chat extends Component {
 			<>
 				<Header
 					{...{ user }}
-					description={user.online ? "Online" : null}
+					description={user.online ? strings.online : null}
 					back
 				/>
 				<FlatList

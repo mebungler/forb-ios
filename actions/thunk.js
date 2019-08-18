@@ -12,6 +12,7 @@ import {
 	favoritesLoaded,
 	servicesLoaded
 } from "./actions";
+import { Clipboard } from "react-native";
 
 export const loginAsync = (data, next, remember) => dispatch => {
 	return api.auth
@@ -144,7 +145,11 @@ export const populateCities = (next = () => {}) => dispatch => {
 	return api.category
 		.getCities()
 		.then(res => {
-			let cats = res.data.data.map(e => ({ label: e.name, value: e.id }));
+			let cats = res.data.data.map(e => ({
+				label: e.name,
+				value: e.id,
+				...e
+			}));
 			dispatch(citiesLoaded(cats));
 			next(res);
 			return res;

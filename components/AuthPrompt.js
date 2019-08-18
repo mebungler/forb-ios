@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
 import NavigationService from "../services/NavigationService";
 import RoundButton from "../components/RoundButton";
+import strings from "../localization/Strings";
 
 const AuthPrompt = props => {
 	return (
@@ -15,23 +16,10 @@ const AuthPrompt = props => {
 				animated
 				fill
 				color={Colors.blue}
-				text="Зарегистрируйтесь"
+				text={strings.register}
 			/>
 		</View>
 	);
 };
 
 export default AuthPrompt;
-
-// <RoundButton
-// 			onPress={() => NavigationService.navigate("Login")}
-// 			animated
-// 			fill
-// 			color={Colors.blue}
-// 			text="Войдите"
-// 		/>
-// 		<Text
-// 			style={{ marginBottom: 0, color: Colors.black, marginTop: 30 }}
-// 		>
-// 			или
-// 		</Text>

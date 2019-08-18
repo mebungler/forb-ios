@@ -2,10 +2,10 @@ import React from "react";
 import axios from "axios";
 
 import StorageService from "../services/StorageService";
-//uavparts.u0717696.cp.regruhosting.ru
 
-export const siteUrl = "http://forb.vteme.uz";
+export const siteUrl = "https://forb.uz";
 export const url = siteUrl + "/api";
+
 export const urlResolve = param => {
 	if (!param) return;
 	if (param[0] !== "/") return siteUrl + "/" + param;
@@ -23,34 +23,37 @@ let packageData = data => {
 			key.indexOf("gallery") !== -1 ||
 			key.indexOf("photo") !== -1
 		) {
+			if (typeof data[key] === typeof 1) {
+				form.append(key, data[key]);
+				continue;
+			}
 			if (!data[key]) continue;
 			if (typeof data[key] !== typeof "") {
-				let normData = [];
 				data[key].forEach(e => {
 					const uriParts = e.split(".");
 					const fileType = uriParts[uriParts.length - 1];
 					form.append(key + "[]", {
-						uri: e.replace("file://", ""),
+						uri: e,
 						name: `photo.${fileType}`,
 						type: `image/${fileType}`
 					});
 				});
-				form.append(key + "[]", normData);
 				continue;
 			}
 			const uriParts = data[key].split(".");
 			const fileType = uriParts[uriParts.length - 1];
+			if (data[key].indexOf("file://") === -1) continue;
 			form.append(key, {
-				uri: data[key].replace("file://", ""),
+				uri: data[key],
 				name: `photo.${fileType}`,
 				type: `image/${fileType}`
 			});
 			continue;
 		}
-		if (key === "property") {
+		if (key === "filter") {
 			data[key].forEach((e, index) => {
-				form.append(`${key}[${index}][key]`, e.key);
-				form.append(`${key}[${index}][value]`, e.value);
+				form.append(`${key}[${index + 1}]`, e);
+				form.append(`${key}[${index + 1}]`, e);
 			});
 			continue;
 		}
@@ -101,21 +104,34 @@ export default {
 				})
 				.then(res => res)
 				.catch(({ response }) => response);
-		}
+		},
+		update: data =>
+			axios
+				.post(`${url}/user/update`, packageData(data), {
+					headers: {
+						Authorization: "Bearer " + getToken()
+					}
+				})
+				.then(res => {
+					return res;
+				})
+				.catch(res => {
+					return res;
+				})
 	},
 	product: {
-		getProducts: () =>
+		getProducts: (index = 1) =>
 			axios
-				.get(url + "/ads")
+				.get(`${url}/ads?page=${index}`)
 				.then(res => res)
 				.catch(({ response }) => response),
 		addProduct: data =>
 			axios
-				.post(`${url}/ads/create`, packageData(data), {
+				.post(`https://forb.uz/api/ads/create`, packageData(data), {
 					headers: {
 						Authorization: "Bearer " + getToken(),
 						Accept: "application/json",
-						"Content-Type": "multipart/form-data"
+						"Content-Type": "application/x-www-form-urlencoded"
 					}
 				})
 				.then(res => {
@@ -124,7 +140,7 @@ export default {
 				})
 				.catch(res => {
 					console.warn("sloll");
-					console.warn(res);
+					console.warn(res.response);
 					return res;
 				}),
 		getActiveAds: () =>
@@ -172,6 +188,15 @@ export default {
 				})
 				.then(res => res)
 				.catch(({ response }) => response),
+		postSearch: data =>
+			axios
+				.post(url + `/ads/search`, packageData(data), {
+					headers: {
+						Authorization: "Bearer " + getToken()
+					}
+				})
+				.then(res => res)
+				.catch(({ response }) => response),
 		view: (id, device) =>
 			axios
 				.get(url + `/ads/view?id=${id}&device_id=${device}`)
@@ -195,7 +220,7 @@ export default {
 				.catch(res => res),
 		remove: id =>
 			axios
-				.post(`${url}/ads/remove?id=${id}`, {
+				.post(`${url}/ads/remove?id=${id}`, null, {
 					headers: {
 						Authorization: "Bearer " + getToken(),
 						Accept: "application/json",
@@ -212,6 +237,11 @@ export default {
 		getByCategory: id =>
 			axios
 				.get(`${url}/ads?category_id=${id}`)
+				.then(res => res)
+				.catch(({ response }) => response),
+		getByUser: id =>
+			axios
+				.get(`${url}/ads?user_id=${id}`)
 				.then(res => res)
 				.catch(({ response }) => response)
 	},
@@ -234,6 +264,16 @@ export default {
 		getServices: () =>
 			axios
 				.get(url + "/category?type=service")
+				.then(res => res)
+				.catch(({ response }) => response),
+		subCategories: id =>
+			axios
+				.get(url + `/category/sub?id=${id}`)
+				.then(res => res)
+				.catch(({ response }) => response),
+		filters: id =>
+			axios
+				.get(url + `/category/filter?id=${id}`)
 				.then(res => res)
 				.catch(({ response }) => response)
 	},

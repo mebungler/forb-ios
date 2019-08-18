@@ -113,7 +113,6 @@ class Statistics extends Component {
 										shadowColor: Colors.gray,
 										shadowRadius: 5,
 										shadowOffset: { width: 0, height: 0 },
-										elevation: 20,
 										shadowOpacity: 1,
 										position: "absolute",
 										padding: 15,

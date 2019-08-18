@@ -5,7 +5,9 @@ import {
 	View,
 	Text,
 	KeyboardAvoidingView,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	Platform,
+	PermissionsAndroid
 } from "react-native";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
@@ -19,6 +21,8 @@ import PropertyItem from "./PropertyItem";
 import MultiImagePicker from "../components/MultiImagePicker";
 import { connect } from "react-redux";
 import api from "../api/api";
+import axios from "axios";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {
 	populateCategories,
@@ -35,7 +39,7 @@ class AddProduct extends Component {
 		price_d: "",
 		title: "",
 		discount: true,
-		property: [{ key: "", value: "" }],
+		properties: [{ key: "", value: "" }],
 		gallery: [],
 		responsible_person: "",
 		photo: "",
@@ -43,15 +47,24 @@ class AddProduct extends Component {
 		city_id: -1,
 		status: "idle",
 		content: "",
-		phone: ""
+		phone: "",
+		lng: 0,
+		lat: 0,
+		isMine: null,
+		subcategories: [],
+		regions: [],
+		region: -1
 	};
 	onChange = (index, item) => {
-		let properties = [...this.state.property];
+		let properties = [...this.state.properties];
 		properties[index] = item;
-		this.setState({ ...this.state, property: properties });
+		this.setState({ ...this.state, properties });
 	};
 	add = e => {
 		this.setState({ ...this.state, gallery: [...this.state.gallery, e] });
+	};
+	pickLocation = ({ latitude, longitude }, isMine) => {
+		this.setState({ ...this.state, lat: latitude, lng: longitude, isMine });
 	};
 	remove = index => {
 		if (index === 0 && this.state.gallery.length === 1) {
@@ -73,81 +86,132 @@ class AddProduct extends Component {
 		this.setState({ ...this.state, status: "rotate" });
 		let {
 			title,
-			category,
+			category_id,
 			content,
-			city,
+			city_id,
 			email,
 			phone,
 			responsible_person,
 			gallery,
-			property,
+			properties,
 			discount,
 			price,
-			price_d
+			price_d,
+			subcategories,
+			regions,
+			region
 		} = this.state;
 		let { cities, categories } = this.props;
+		let cat =
+			category_id === -1 ? null : parseInt(categories[category_id].value);
+		if (subcategories.length > 0) {
+			cat =
+				subcategories[subcategories.length - 1].data[
+					parseInt(subcategories[subcategories.length - 1].value)
+				].id;
+			cat = parseInt(cat);
+		}
+		let _city = city_id === -1 ? null : parseInt(cities[city_id].value);
+		if (region !== -1) {
+			_city = parseInt(regions[region].value);
+		}
 		let data = {
 			title,
 			content,
 			email,
 			phone,
-			gallery: [...gallery.slice(1, photos.length)],
+			gallery: [...gallery.slice(1, gallery.length)],
 			photo: gallery[0],
-			property,
+			filter: properties.map(({ key, value }) => ({
+				key,
+				value
+			})),
 			type: discount ? 1 : 2,
 			price,
 			price_d,
-			category_id:
-				category_id === -1
-					? null
-					: parseInt(categories[category].value),
-			city_id: city_id === -1 ? null : parseInt(cities[city].value),
+			category_id: cat,
+			city_id: _city,
 			responsible_person
 		};
 		api.product
 			.addProduct(data)
 			.then(res => {
-				this.props.dispatch(populateProducts());
-				this.props.navigation.navigate("Products");
 				this.setState({ ...this.state, status: "idle" });
+				this.props.navigation.navigate("Products");
 			})
-			.catch(({ response: res }) => {
+			.catch(res => {
 				this.setState({ ...this.state, status: "idle" });
 			});
 	};
 
+	getUserLocation = () => {
+		if (Platform.OS === "android") {
+			try {
+				PermissionsAndroid.request(
+					PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+					{
+						title: "Forb",
+						message: strings.accessLocation,
+						buttonNegative: strings.cancel,
+						buttonPositive: strings.good
+					}
+				).then(granted => {
+					if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+						navigator.geolocation.getCurrentPosition(
+							e => {
+								console.warn(e);
+								this.pickLocation(e, true);
+							},
+							null,
+							{ enableHighAccuracy: true, timeout: 30000 }
+						);
+						return;
+					} else {
+						return;
+					}
+				});
+			} catch (err) {
+				return;
+			}
+		}
+		try {
+			console.warn(navigator.geolocation);
+			// navigator.geolocation.getCurrentPosition(e => {
+			// 	console.warn(e);
+			// 	this.pickLocation(e, true);
+			// });
+		} catch (e) {
+			alert("Your phone does not support Location API");
+		}
+	};
+
 	componentDidMount() {
-		let item = this.props.navigation.getParam("item");
-		this.props.dispatch(
-			populateCategories(() => {
-				this.props.dispatch(
-					populateCities(() =>
-						this.setState({ ...this.state, ...item })
-					)
-				);
-			})
-		);
+		this.props.dispatch(populateCategories());
+		this.props.dispatch(populateCities());
 	}
 
 	render() {
 		let {
 			category_id,
-			property,
+			properties,
 			gallery,
 			responsible_person,
 			email,
 			phone,
 			city_id,
 			status,
-			price,
-			price_d,
-			title,
-			content
+			isMine,
+			subcategories,
+			regions,
+			region
 		} = this.state;
-		let { add, remove } = this;
+		let { add, remove, pickLocation } = this;
 		let { cities, categories } = this.props;
 		return (
-			<ScrollView showsVerticalScrollIndicator={false}>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				style={{ backgroundColor: Colors.lightGray }}
+			>
 				<View
 					style={{
 						padding: 30,
@@ -173,7 +237,7 @@ class AddProduct extends Component {
 								color={Colors.pink}
 							/>
 						)}
-						placeholder={`Выберите рубрику `}
+						placeholder={strings.chooseCategory}
 						selectedValue={
 							category_id === -1
 								? ""
@@ -185,15 +249,112 @@ class AddProduct extends Component {
 							borderStyle: "dashed",
 							borderRadius: 30,
 							marginTop: 15,
-							width: width - 60
+							width: width - 60,
+							marginBottom: 15
 						}}
 						onValueChange={(val, index) => {
+							api.category
+								.subCategories(categories[index - 1].id)
+								.then(res => {
+									let normData = res.data.data.map(e => ({
+										value: e.id,
+										label: e.name,
+										...e
+									}));
+									this.setState({
+										...this.state,
+										subcategories: [
+											{
+												value: -1,
+												data: normData
+											}
+										]
+									});
+								});
 							this.setState({
 								...this.state,
-								category_id: index - 1
+								category_id: index - 1,
+								subcategories: []
 							});
 						}}
 					/>
+					{subcategories.map((e, i) => {
+						if (!e || !e.data) {
+							return null;
+						}
+						if (
+							!subcategories[i] ||
+							subcategories[i].data.length <= 0
+						)
+							return null;
+						return (
+							<DefaultPicker
+								placeholder={strings.chooseSubcategory}
+								rightIcon={() => (
+									<Icon
+										name="chevrondown"
+										size={10}
+										color={Colors.pink}
+									/>
+								)}
+								selectedValue={
+									subcategories[i].value === -1
+										? ""
+										: subcategories[i].data[
+												subcategories[i].value
+										  ].label
+								}
+								data={subcategories[i].data}
+								onValueChange={(val, index) => {
+									api.category
+										.subCategories(
+											subcategories[i].data[index - 1].id
+										)
+										.then(res => {
+											if (
+												res.data.data &&
+												res.data.data.length > 0
+											) {
+												let normData = res.data.data.map(
+													e => ({
+														value: e.id,
+														label: e.name,
+														...e
+													})
+												);
+												this.setState({
+													...this.state,
+													subcategories: [
+														...subcategories,
+														{
+															value: -1,
+															data: normData
+														}
+													]
+												});
+											} else return;
+										});
+									let subs = subcategories;
+									subs[i].value = index - 1;
+									this.setState({
+										...this.state,
+										subcategories: subs
+									});
+								}}
+								style={{
+									backgroundColor: Colors.white,
+									borderColor: Colors.gray,
+									borderWidth: 1,
+									shadowColor: Colors.gray,
+									shadowRadius: 2,
+									shadowOffset: { width: 0, height: 0 },
+									borderRadius: 30,
+									marginBottom: 10
+								}}
+								small
+							/>
+						);
+					})}
 					<View
 						style={{
 							flexDirection: "row",
@@ -214,7 +375,7 @@ class AddProduct extends Component {
 							}}
 							iconType="material-community"
 							checkedIcon="circle-slice-8"
-							title="Торг уместен"
+							title={strings.bargaining}
 							checkedColor={Colors.blue}
 							uncheckedIcon="checkbox-blank-circle-outline"
 							textStyle={{
@@ -240,7 +401,7 @@ class AddProduct extends Component {
 							checkedColor={Colors.blue}
 							iconType="material-community"
 							checkedIcon="circle-slice-8"
-							title="Окончательная цена"
+							title={strings.finalPrice}
 							uncheckedIcon="checkbox-blank-circle-outline"
 							textStyle={{
 								color: Colors.black,
@@ -269,11 +430,19 @@ class AddProduct extends Component {
 									color={"#c4c4c4"}
 								/>
 							)}
-							value={price.toString()}
 							wider
-							placeholder="Цена (суммы)"
+							placeholder={strings.price}
 							name="price"
+							keyboardType="numeric"
 							error={this.state.errors}
+							required
+							rightIcon={() => (
+								<FontAwesome
+									name="asterisk"
+									size={12}
+									color={Colors.pink}
+								/>
+							)}
 						/>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -289,10 +458,18 @@ class AddProduct extends Component {
 									color={"#c4c4c4"}
 								/>
 							)}
-							value={price_d.toString()}
 							wider
-							placeholder="Цена (доллары)"
+							placeholder={strings.priceD}
+							keyboardType="numeric"
 							name="price_d"
+							required
+							rightIcon={() => (
+								<FontAwesome
+									name="asterisk"
+									size={12}
+									color={Colors.pink}
+								/>
+							)}
 						/>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -304,10 +481,17 @@ class AddProduct extends Component {
 							leftIcon={() => (
 								<Icon name="name" size={24} color={"#c4c4c4"} />
 							)}
-							value={title}
 							wider
-							placeholder="Ввести заголовок"
+							placeholder={strings.enterTitle}
 							name="title"
+							required
+							rightIcon={() => (
+								<FontAwesome
+									name="asterisk"
+									size={12}
+									color={Colors.pink}
+								/>
+							)}
 						/>
 					</View>
 					<View
@@ -326,15 +510,15 @@ class AddProduct extends Component {
 								marginTop: 15
 							}}
 						>
-							Дополнительные поля
+							{strings.additionalFields}
 						</Text>
 					</View>
-					{property &&
-						property.map(({ key, value }, index) => {
+					{properties &&
+						properties.map(({ key, value }, index) => {
 							return (
 								<PropertyItem
 									{...{ key, value, index }}
-									border={key !== property.length - 1}
+									border={key !== properties.length - 1}
 									onChange={this.onChange}
 								/>
 							);
@@ -344,15 +528,16 @@ class AddProduct extends Component {
 							flex: 1,
 							justifyContent: "flex-end",
 							flexDirection: "row",
-							paddingRight: 15
+							paddingRight: 15,
+							paddingTop: 15
 						}}
 					>
 						<TouchableWithoutFeedback
 							onPress={() => {
 								this.setState({
 									...this.state,
-									property: [
-										...this.state.property,
+									properties: [
+										...this.state.properties,
 										{ key: "", value: "" }
 									]
 								});
@@ -381,7 +566,7 @@ class AddProduct extends Component {
 								marginTop: 15
 							}}
 						>
-							Описание
+							{strings.description}
 						</Text>
 					</View>
 					<RoundInput
@@ -395,7 +580,6 @@ class AddProduct extends Component {
 								[key]: val
 							})
 						}
-						value={content}
 						name="content"
 					/>
 					<View
@@ -414,7 +598,7 @@ class AddProduct extends Component {
 								marginTop: 15
 							}}
 						>
-							Добавить фото
+							{strings.addPhoto}
 						</Text>
 					</View>
 					<MultiImagePicker {...{ photos: gallery, add, remove }} />
@@ -434,7 +618,7 @@ class AddProduct extends Component {
 								marginTop: 15
 							}}
 						>
-							Ваши контактные данные
+							{strings.yourContacts}
 						</Text>
 					</View>
 					<DefaultPicker
@@ -448,13 +632,27 @@ class AddProduct extends Component {
 						selectedValue={
 							city_id === -1 ? "" : cities[city_id].label
 						}
-						placeholder={"Город предоставления услугу"}
+						placeholder={strings.cityOfService}
 						data={cities}
 						onValueChange={(val, index) => {
 							this.setState({
 								...this.state,
 								city_id: index - 1
 							});
+							api.category
+								.subCategories(cities[index - 1].id)
+								.then(res => {
+									console.warn(cities[index - 1]);
+									let normData = res.data.data.map(e => ({
+										value: e.id,
+										label: e.name,
+										...e
+									}));
+									this.setState({
+										...this.state,
+										regions: normData
+									});
+								});
 						}}
 						style={{
 							backgroundColor: Colors.white,
@@ -467,6 +665,98 @@ class AddProduct extends Component {
 						}}
 						small
 					/>
+					{regions && regions.length > 0 && (
+						<DefaultPicker
+							rightIcon={() => (
+								<Icon
+									name="chevrondown"
+									size={10}
+									color={Colors.pink}
+								/>
+							)}
+							selectedValue={
+								region === -1 ? "" : regions[region].label
+							}
+							placeholder={strings.chooseArea}
+							data={regions}
+							onValueChange={(val, index) => {
+								this.setState({
+									...this.state,
+									region: index - 1
+								});
+							}}
+							style={{
+								backgroundColor: Colors.white,
+								borderColor: Colors.gray,
+								borderWidth: 1,
+								shadowColor: Colors.gray,
+								shadowRadius: 2,
+								shadowOffset: { width: 0, height: 0 },
+								borderRadius: 30,
+								marginTop: 10
+							}}
+							small
+						/>
+					)}
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "flex-start",
+							flex: 1
+						}}
+					>
+						<Text
+							style={{
+								color: Colors.black,
+								fontWeight: "bold",
+								fontSize: 18,
+								marginBottom: 15,
+								marginTop: 15
+							}}
+						>
+							{strings.address}
+						</Text>
+					</View>
+					<View style={{}}>
+						<TouchableWithoutFeedback
+							onPress={() => {
+								this.props.navigation.navigate("PickLocation", {
+									pickLocation
+								});
+							}}
+						>
+							<View style={{ padding: 15, flexDirection: "row" }}>
+								<Icon
+									name="adress"
+									size={18}
+									color={Colors.darkGray}
+								/>
+								<Text
+									style={{
+										marginLeft: 15,
+										fontSize: 16,
+										color: Colors.darkGray
+									}}
+								>
+									Указать на карте
+								</Text>
+								{isMine !== null && !isMine && (
+									<View
+										style={{
+											flex: 1,
+											alignItems: "flex-end"
+										}}
+									>
+										<Icon
+											name="ok"
+											size={18}
+											color={"green"}
+										/>
+									</View>
+								)}
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
 					<View style={{ marginLeft: -15, paddingBottom: 15 }}>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -485,8 +775,16 @@ class AddProduct extends Component {
 							simple
 							placeholder="+998 99 123 45 67"
 							wider
-							value={phone}
+							keyboardType="phone-pad"
 							name="phone"
+							required
+							rightIcon={() => (
+								<FontAwesome
+									name="asterisk"
+									size={12}
+									color={Colors.pink}
+								/>
+							)}
 						/>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -501,8 +799,16 @@ class AddProduct extends Component {
 							simple
 							placeholder="Почта (e-mail)"
 							wider
+							keyboardType="email-address"
 							name="email"
-							value={email}
+							required
+							rightIcon={() => (
+								<FontAwesome
+									name="asterisk"
+									size={12}
+									color={Colors.pink}
+								/>
+							)}
 						/>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -522,7 +828,6 @@ class AddProduct extends Component {
 							placeholder="Ответственное лицо"
 							name="responsible_person"
 							wider
-							value={responsible_person}
 						/>
 					</View>
 					<View
@@ -559,3 +864,35 @@ class AddProduct extends Component {
 const mapStateToProps = ({ cities, categories }) => ({ cities, categories });
 
 export default connect(mapStateToProps)(AddProduct);
+
+/*selectedValue={
+									subcategories[i].value === -1
+										? ""
+										: subcategories[i].data[
+												subcategories[i].value
+										  ]
+								}
+								placeholder={"Выберите подкатегорию"}
+								data={subcategories[i].data}
+								onValueChange={(val, index) => {
+									let subs = this.state.subcategories;
+									subs[i].value = index - 1;
+									this.setState({
+										...this.state,
+										subcategories: subs
+									});
+									api.category
+										.subCategories(categories[category_id])
+										.then(res => {
+											this.setState({
+												...this.state,
+												subcategories: [
+													...subcategories,
+													{
+														value: -1,
+														data: res.data.data
+													}
+												]
+											});
+										});
+								}}*/

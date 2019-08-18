@@ -5,6 +5,11 @@ export const userLoggedIn = user => ({
 	user
 });
 
+export const userEditing = user => ({
+	type: "USER_EDITING",
+	user
+});
+
 export const userLoggedOut = user => ({
 	type: "USER_LOGGED_OUT",
 	user

@@ -1,5 +1,6 @@
 import React from "react";
 import { AsyncStorage } from "react-native";
+import strings from "../localization/Strings";
 
 let state = {};
 let favorites = [];
@@ -13,7 +14,8 @@ const initialize = async () => {
 	}
 	let res = JSON.parse(result);
 	let resB = JSON.parse(resA);
-	state = res === null ? {} : res;
+	state = res === null ? { language: "ru" } : res;
+	strings.setLanguage(state.language);
 	favorites = resB === null ? [] : resB;
 };
 

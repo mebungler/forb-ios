@@ -3,6 +3,7 @@ import { StyleSheet, View, TextInput } from "react-native";
 import Border from "../components/Border";
 import Colors from "../constants/Colors";
 import Icon from "../services/IconService";
+import strings from "../localization/Strings";
 
 class PropertyItem extends Component {
 	render() {
@@ -11,7 +12,7 @@ class PropertyItem extends Component {
 			<View style={{ flexDirection: "row" }}>
 				<View style={{ flex: 1 }}>
 					<TextInput
-						placeholder={"Имя"}
+						placeholder={strings.name}
 						value={name}
 						style={{
 							fontSize: 18,
@@ -23,7 +24,7 @@ class PropertyItem extends Component {
 						}
 					/>
 					<TextInput
-						placeholder={"Назначения"}
+						placeholder={strings.appoinments}
 						value={value}
 						style={{
 							fontSize: 18,

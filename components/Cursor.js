@@ -32,16 +32,3 @@ export default ({ d, r, borderWidth, borderColor, text, position }) => {
     </View>
   );
 };
-
-// <Animated.View
-//           style={{
-//             marginBottom: 10,
-//             backgroundColor: Colors.pink,
-//             borderRadius: 5,
-//             padding: 10,
-//             paddingTop: 4,
-//             paddingBottom: 4,
-//             transform: [{ scaleX: animation }, { scaleY: animation }]
-//           }}
-
-//         >

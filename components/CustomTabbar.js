@@ -93,7 +93,6 @@ class CustomTabbar extends Component {
 											toValue: -width + actualWidth * key,
 											useNativeDriver: true
 										}).start();
-										console.warn("WTF");
 									}}
 									{...{ key }}
 								>

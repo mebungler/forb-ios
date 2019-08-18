@@ -20,13 +20,42 @@ import StorageService from "../services/StorageService";
 import NavigationService from "../services/NavigationService";
 import Layout from "../constants/Layout";
 import AuthPrompt from "../components/AuthPrompt";
-
+import { userEditing, userLoggedIn } from "../actions/actions";
+import api from "../api/api";
 const { width } = Layout;
+import strings from "../localization/Strings";
 
 class Account extends Component {
-	state = { marginTop: 0 };
+	state = { marginTop: 0, status: "idle" };
+	update = () => {
+		this.setState({ ...this.state, status: "rotate" });
+		let { name, phone, photo, position, email } = this.props.user;
+		let {
+			organization,
+			responsible_person,
+			address
+		} = this.props.user.company;
+		let data = {
+			name,
+			phone,
+			photo,
+			email,
+			organization,
+			responsible_person,
+			address
+		};
+		api.user.update(data).then(res => {
+			this.props.dispatch(
+				userLoggedIn({
+					...res.data,
+					language: StorageService.getState().language
+				})
+			);
+			this.setState({ ...this.state, status: "idle" });
+		});
+	};
 	render() {
-		let { marginTop } = this.state;
+		let { marginTop, status } = this.state;
 		let { user } = this.props;
 		let { company = {} } = user;
 		return (
@@ -56,8 +85,7 @@ class Account extends Component {
 						paddingTop: 80,
 						paddingBottom: 30,
 						zIndex: -999,
-						marginTop: 80,
-						elevation: 20
+						marginTop: 80
 					}}
 				>
 					<View style={{ alignItems: "center" }}>
@@ -159,23 +187,25 @@ class Account extends Component {
 							}}
 						/>
 					</View>
-					<TouchableWithoutFeedback onPress={() => {}}>
-						<View
-							style={{
-								height: 30,
-								width: 30,
-								borderRadius: 15,
-								backgroundColor: Colors.pink,
-								justifyContent: "center",
-								alignItems: "center",
-								flexDirection: "row",
-								marginTop: -105,
-								marginLeft: 70
-							}}
-						>
-							<Icon name="change-photo" color="white" />
-						</View>
-					</TouchableWithoutFeedback>
+					{false && (
+						<TouchableWithoutFeedback onPress={() => {}}>
+							<View
+								style={{
+									height: 30,
+									width: 30,
+									borderRadius: 15,
+									backgroundColor: Colors.pink,
+									justifyContent: "center",
+									alignItems: "center",
+									flexDirection: "row",
+									marginTop: -105,
+									marginLeft: 70
+								}}
+							>
+								<Icon name="change-photo" color="white" />
+							</View>
+						</TouchableWithoutFeedback>
+					)}
 				</View>
 
 				<View
@@ -213,81 +243,28 @@ class Account extends Component {
 										fontSize: 24
 									}}
 								>
-									Мои объявления
-								</Text>
-							</View>
-						</View>
-					</TouchableWithoutFeedback>
-					<TouchableWithoutFeedback
-						onPress={() => NavigationService.navigate("Payment")}
-					>
-						<View
-							style={{
-								flexDirection: "row",
-								width: width - 30,
-								paddingTop: 15,
-								paddingBottom: 15,
-								paddingLeft: 15
-							}}
-						>
-							<View style={{ flex: 0.2 }}>
-								<Icon
-									name="payment"
-									size={25}
-									color={Colors.blue}
-								/>
-							</View>
-							<View style={{ flex: 1 }}>
-								<Text
-									style={{
-										marginLeft: 10,
-										color: Colors.blue,
-										fontSize: 24
-									}}
-								>
-									Оплата
-								</Text>
-							</View>
-						</View>
-					</TouchableWithoutFeedback>
-					<TouchableWithoutFeedback
-						onPress={() => NavigationService.navigate("Statistics")}
-					>
-						<View
-							style={{
-								flexDirection: "row",
-								flex: 1,
-								paddingTop: 15,
-								paddingBottom: 15,
-								width: width - 30,
-								paddingLeft: 15
-							}}
-						>
-							<View style={{ flex: 0.2 }}>
-								<Icon
-									name="statistics"
-									size={25}
-									color={Colors.blue}
-								/>
-							</View>
-							<View style={{ flex: 1 }}>
-								<Text
-									style={{
-										marginLeft: 10,
-										color: Colors.blue,
-										fontSize: 24
-									}}
-								>
-									Статистика
+									{strings.myAnnouncements}
 								</Text>
 							</View>
 						</View>
 					</TouchableWithoutFeedback>
 					<DefaultText
+						onChange={text =>
+							this.props.dispatch(
+								userEditing({
+									...user,
+									company: {
+										...company,
+										organization: text
+									}
+								})
+							)
+						}
+						tag="organization"
 						editable
 						style={{ right: 0, left: 0 }}
-						text={company.organization && company.organization}
-						name="Организация"
+						text={company && company.organization}
+						name={strings.organization}
 						icon={() => (
 							<Icon
 								name="organization"
@@ -305,31 +282,22 @@ class Account extends Component {
 					/>
 					<Border />
 					<DefaultText
+						onChange={text =>
+							this.props.dispatch(
+								userEditing({
+									...user,
+									company: {
+										...company,
+										responsible_person: text
+									}
+								})
+							)
+						}
+						tag="responsible_person"
 						editable
 						style={{ right: 0, left: 0 }}
-						text={company.address}
-						name="Город услуг"
-						icon={() => (
-							<Icon
-								name="location-filter"
-								size={20}
-								color={Colors.darkGray}
-							/>
-						)}
-						editIcon={() => (
-							<Icon
-								name="penciledit"
-								size={22}
-								color={Colors.black}
-							/>
-						)}
-					/>
-					<Border />
-					<DefaultText
-						editable
-						style={{ right: 0, left: 0 }}
-						text={company.responsible_person}
-						name="Ответственное лицо"
+						text={company && company.responsible_person}
+						name={strings.responsiblePerson}
 						icon={() => (
 							<Icon
 								name="responsible-person"
@@ -347,10 +315,22 @@ class Account extends Component {
 					/>
 					<Border />
 					<DefaultText
+						onChange={text =>
+							this.props.dispatch(
+								userEditing({
+									...user,
+									company: {
+										...company,
+										address: text
+									}
+								})
+							)
+						}
+						tag="address"
 						editable
 						style={{ right: 0, left: 0 }}
-						text={company.address}
-						name="Адрес"
+						text={company && company.address}
+						name={strings.address}
 						icon={() => (
 							<Icon
 								name="adress"
@@ -369,10 +349,13 @@ class Account extends Component {
 					<RoundButton
 						fill
 						color={Colors.blue}
-						text="Сохранить настройки"
+						text={strings.saveSettings}
 						medium
 						big
 						bold
+						animated
+						status={status}
+						onPress={this.update}
 					/>
 				</View>
 			</ScrollView>
@@ -380,60 +363,21 @@ class Account extends Component {
 	}
 }
 
-const MainView = ({ authenticated, user }) => {
+const MainView = ({ authenticated, user, dispatch }) => {
 	if (authenticated) {
-		return <Account {...{ user }} />;
+		return <Account {...{ user, dispatch }} />;
 	}
 	return <AuthPrompt />;
 };
 
 const mapStateToProps = ({ user }) => {
-	if (!Object.keys(user).length > 0) {
+	if (Object.keys(user).length <= 1) {
 		return {
 			user: StorageService.getState(),
-			authenticated: Object.keys(StorageService.getState()).length > 0
+			authenticated: Object.keys(StorageService.getState()).length > 1
 		};
 	}
 	return { user, authenticated: true };
 };
 
 export default connect(mapStateToProps)(MainView);
-
-// <Text
-// 						style={{
-// 							color: Colors.black,
-// 							fontSize: 18,
-// 							marginBottom: 15,
-// 							fontWeight: "bold"
-// 						}}
-// 					>
-// 						Социалные сети
-// 					</Text>
-// 					<Text style={{ color: Colors.black, fontSize: 14 }}>
-// 						Добавьте аккаунты ваших социалных сетей и используйте их
-// 						при авторизации
-// 					</Text>
-// 					<View
-// 						style={{
-// 							flexDirection: "row",
-// 							paddingTop: 15,
-// 							justifyContent: "center",
-// 							paddingBottom: 15
-// 						}}
-// 					>
-// 						<FIcon
-// 							style={{ margin: 2 }}
-// 							size={40}
-// 							name="facebook-square"
-// 						/>
-// 						<FIcon
-// 							style={{ margin: 2 }}
-// 							size={40}
-// 							name="google-plus-square"
-// 						/>
-// 						<FIcon
-// 							style={{ margin: 2 }}
-// 							size={40}
-// 							name="twitter-square"
-// 						/>
-// 					</View>

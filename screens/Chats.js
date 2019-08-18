@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 import api from "../api/api";
 import Layout from "../constants/Layout";
 import Colors from "../constants/Colors";
+import strings from "../localization/Strings";
 
 const { width, height } = Layout;
 
@@ -53,7 +54,7 @@ class Chats extends Component {
 											fontSize: 18
 										}}
 									>
-										Переписки не существует
+										{strings.correspendenceDoesNotExist}
 									</Text>
 								</View>
 							);
@@ -79,7 +80,7 @@ class Chats extends Component {
 
 const mapStateToProps = ({ chats, user }) => ({
 	chats,
-	authenticated: Object.keys(user).length > 0
+	authenticated: Object.keys(user).length > 1
 });
 
 export default connect(mapStateToProps)(Chats);

@@ -20,6 +20,7 @@ import { Feather } from "react-native-vector-icons";
 import { loginAsync } from "../actions/thunk";
 import { connect } from "react-redux";
 import NavigationService from "../services/NavigationService";
+import strings from "../localization/Strings";
 import StorageService from "../services/StorageService";
 
 class Prompt extends React.Component {
@@ -44,7 +45,7 @@ class Prompt extends React.Component {
 							fontSize: 18
 						}}
 					>
-						Добро пожаловать в Forb
+						{strings.welcome}
 					</Text>
 					<View style={{ paddingLeft: 30, paddingRight: 30 }}>
 						<RoundButton
@@ -54,13 +55,13 @@ class Prompt extends React.Component {
 							big
 							bold
 							medium
-							text="Войдите без авторизации"
+							text={strings.withoutRegistration}
 						/>
 						<RoundButton
 							onPress={() => navigation.navigate("Login")}
 							fill
 							color={Colors.white}
-							text="Зарегистрируйтесь"
+							text={strings.checkIn}
 							style={{ marginTop: 30 }}
 							big
 							medium

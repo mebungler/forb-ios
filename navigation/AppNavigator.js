@@ -12,6 +12,7 @@ import Ads from "../screens/Ads";
 import StorageService from "../services/StorageService";
 import Prompt from "../screens/Prompt";
 import VerifyPhone from "../screens/VerifyPhone";
+import strings from "../localization/Strings";
 
 const auth = createStackNavigator(
 	{
@@ -19,21 +20,21 @@ const auth = createStackNavigator(
 		Register: {
 			screen: Register,
 			navigationOptions: {
-				header: () => <Header name="Регистрация компании" back />
+				header: () => <Header name={strings.companyRegistration} back />
 			}
 		},
 		Prompt: { screen: Prompt, navigationOptions: { header: null } },
 		VerifyPhone: {
 			screen: VerifyPhone,
 			navigationOptions: {
-				header: () => <Header name="Подтверждения номера" back />
+				header: () => <Header name={strings.numberConfirmation} back />
 			}
 		}
 	},
 	{ initialRouteName: "Prompt" }
 );
 
-export default createRooNavigator = (isSignedIn = false) => {
+export default (createRooNavigator = (isSignedIn = false) => {
 	return createAppContainer(
 		createSwitchNavigator(
 			{
@@ -50,4 +51,4 @@ export default createRooNavigator = (isSignedIn = false) => {
 			}
 		)
 	);
-};
+});

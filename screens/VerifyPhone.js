@@ -4,16 +4,19 @@ import RoundInput from "../components/RoundInput";
 import RoundButton from "../components/RoundButton";
 import Colors from "../constants/Colors";
 import api from "../api/api";
+import strings from "../localization/Strings";
 
 class VerifyPhone extends Component {
 	state = { status: "idle", code: "", errors: {} };
 	verify = () => {
 		let user_id = this.props.navigation.getParam("user_id");
+		let register = this.props.navigation.getParam("register");
 		this.setState({ ...this.state, status: "rotate" });
 		api.auth
 			.sendCode({ phone_code: this.state.code, user_id })
 			.then(res => {
 				if (res.status === 200) {
+					register(res.data.data);
 					this.props.navigation.navigate("Main");
 				} else {
 					this.setState({
@@ -42,14 +45,13 @@ class VerifyPhone extends Component {
 						textAlign: "center"
 					}}
 				>
-					Мы отправили сообщения на ваш телефон. Введите его чтобы
-					закончить регистрацию
+					{strings.weSentMessage}
 				</Text>
 				<RoundInput
 					onTextChange={(key, val) =>
 						this.setState({ ...this.setState, [key]: val })
 					}
-					placeholder="Код подтверждение"
+					placeholder={strings.confirmationCode}
 					name="code"
 					textContentType="oneTimeCode"
 					keyboardType="numeric"
@@ -62,7 +64,7 @@ class VerifyPhone extends Component {
 					animated
 					fill
 					color={Colors.blue}
-					text="Подтвердить"
+					text={strings.confirm}
 					disabledIcon={() => (
 						<Icon
 							name="right-arrow"

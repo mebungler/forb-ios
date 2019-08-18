@@ -20,6 +20,7 @@ import api from "../api/api";
 import { populateChats } from "../actions/thunk";
 import { messagesLoaded } from "../actions/actions";
 import { connect } from "react-redux";
+import strings from "../localization/Strings";
 
 const { width, height: h } = Dimensions.get("window");
 const height = 64;
@@ -75,6 +76,7 @@ export class TabBarComponent extends React.Component {
 			return;
 		}
 		this.rotateButton();
+		let stay = this.props.route.stay;
 		api.chat
 			.send({
 				getter_id: this.props.route.getter_id,
@@ -85,7 +87,7 @@ export class TabBarComponent extends React.Component {
 				setTimeout(() => this.enableButton(), 1000);
 			});
 		this.setState({ ...this.state, text: "" });
-		NavigationService.navigate("ChatsTab");
+		if (!stay) NavigationService.navigate("Chats");
 	};
 
 	componentDidUpdate(prevProps, prevState) {
@@ -153,7 +155,7 @@ export class TabBarComponent extends React.Component {
 							height: 40,
 							transform: [{ rotate: "180deg" }]
 						}}
-						colors={[Colors.gray, "#ffffff00"]}
+						colors={[Colors.lightGray, "#ffffff00"]}
 					/>
 					<View
 						style={{
@@ -180,7 +182,7 @@ export class TabBarComponent extends React.Component {
 								onChangeText={e =>
 									this.setState({ ...this.state, text: e })
 								}
-								placeholder="Напишите сообщение"
+								placeholder={strings.writeMessage}
 							/>
 						</View>
 						<TouchableWithoutFeedback onPress={sendMessage}>
@@ -347,7 +349,7 @@ export class TabBarComponent extends React.Component {
 
 const mapStateToProps = ({ route, user }) => ({
 	route,
-	authenticated: Object.keys(user).length > 0
+	authenticated: Object.keys(user).length > 1
 });
 
 export default connect(mapStateToProps)(TabBarComponent);

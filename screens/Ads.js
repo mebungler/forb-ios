@@ -15,6 +15,7 @@ import AdsItem from "./AdsItem";
 import Border from "../components/Border";
 import Layout from "../constants/Layout";
 import api from "../api/api";
+import strings from "../localization/Strings";
 
 const { width, height } = Layout;
 
@@ -102,7 +103,6 @@ class Ads extends Component {
 										shadowColor: Colors.gray,
 										shadowRadius: 5,
 										shadowOffset: { width: 0, height: 0 },
-										elevation: 20,
 										shadowOpacity: 1,
 										position: "absolute",
 										padding: 15,
@@ -123,7 +123,7 @@ class Ads extends Component {
 										zIndex: 2
 									}}
 								>
-									Активные (5)
+									{strings.active} ({activeItems.length})
 								</Text>
 							</View>
 						</TouchableWithoutFeedback>
@@ -146,17 +146,11 @@ class Ads extends Component {
 										zIndex: 2
 									}}
 								>
-									Не активные (5)
+									{strings.inActive} ({inactiveItems.length})
 								</Text>
 							</View>
 						</TouchableWithoutFeedback>
 					</View>
-					<Icon
-						name="chevron"
-						size={20}
-						color={Colors.pink}
-						style={{ padding: 8 }}
-					/>
 				</View>
 				<Border style={{ marginLeft: 15 }} />
 				<View style={{ flexDirection: "row" }}>
@@ -189,7 +183,7 @@ class Ads extends Component {
 												fontSize: 18
 											}}
 										>
-											Объявления не существует
+											{strings.adsDoNotExist}
 										</Text>
 									</View>
 								);

@@ -4,7 +4,8 @@ import {
 	TextInput as Input,
 	Dimensions,
 	KeyboardAvoidingView,
-	Text
+	Text,
+	TouchableWithoutFeedback
 } from "react-native";
 import { Card } from "react-native-elements";
 import Colors from "../constants/Colors";
@@ -18,7 +19,7 @@ class RoundInput extends Component {
 	renderLeftIcon = () => {
 		let { leftIcon: LeftIcon, small, full } = this.props;
 		if (!LeftIcon || (small && !full)) {
-			return;
+			return null;
 		}
 		return <LeftIcon />;
 	};
@@ -28,11 +29,13 @@ class RoundInput extends Component {
 			rightIcon: RightIcon,
 			successIcon: SuccessIcon,
 			small,
-			full
+			full,
+			required
 		} = this.props;
+		if (required) return <RightIcon />;
 		let { focused, iconState } = this.state;
 		if ((!RightIcon || iconState === 0 || small) && !full) {
-			return;
+			return null;
 		}
 		if (iconState === 2) return <SuccessIcon />;
 		return <RightIcon />;
@@ -62,6 +65,8 @@ class RoundInput extends Component {
 			main,
 			error,
 			name,
+			onRightIconPress = () => {},
+			required,
 			...rest
 		} = this.props;
 		let { placeholder } = this.state;
@@ -80,8 +85,8 @@ class RoundInput extends Component {
 		if (main) {
 			width = Dimensions.get("window").width - 30;
 		}
-		let renderIcons = !small || full;
-		let second = !simple || full;
+		let renderIcons = (!small || full) && LeftIcon;
+		let second = (!simple || full) && RightIcon;
 		return (
 			<React.Fragment>
 				<Card
@@ -106,7 +111,7 @@ class RoundInput extends Component {
 						},
 						small && { margin: 0 },
 						full && {
-							marginTop: 10,
+							marginTop: 0,
 							paddingTop: 0,
 							paddingLeft: 10
 						},
@@ -132,7 +137,7 @@ class RoundInput extends Component {
 							small && {
 								alignItems: "center",
 								justifyContent: "center",
-								paddingTop: 8
+								paddingTop: 0
 							},
 							multiline && { paddingLeft: 0 }
 						]}
@@ -186,10 +191,11 @@ class RoundInput extends Component {
 								}
 								{...rest}
 								placeholderTextColor={
-									transparent ? Colors.white : Colors.black
+									transparent
+										? Colors.lightGray
+										: Colors.black
 								}
 								style={[
-									style,
 									{ width: simple ? width - 80 : 175 },
 									small && { width: 40 },
 									full && { width: width - 80, fontSize: 18 },
@@ -197,7 +203,11 @@ class RoundInput extends Component {
 										color: transparent
 											? Colors.white
 											: Colors.black
-									}
+									},
+									multiline && {
+										height: width - 30
+									},
+									style
 								]}
 								onChangeText={e => {
 									if (email || password) {
@@ -218,10 +228,14 @@ class RoundInput extends Component {
 								secureTextEntry={password ? true : false}
 							/>
 						</View>
-						{second && (
-							<View style={{ alignItems: "flex-end" }}>
-								{renderRightIcon()}
-							</View>
+						{(second || required) && (
+							<TouchableWithoutFeedback
+								onPress={onRightIconPress}
+							>
+								<View style={{ alignItems: "flex-end" }}>
+									{renderRightIcon()}
+								</View>
+							</TouchableWithoutFeedback>
 						)}
 					</View>
 				</Card>

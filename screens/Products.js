@@ -13,34 +13,73 @@ import ProductItem from "./ProductItem";
 import Header from "../components/Header";
 import { connect } from "react-redux";
 import Layout from "../constants/Layout";
+
 import api from "../api/api";
 
-import { populateProducts, populateFavorites } from "../actions/thunk";
-import { favoritesLoaded } from "../actions/actions";
-
+import {
+	populateProducts,
+	populateFavorites,
+	populateCities
+} from "../actions/thunk";
+import { favoritesLoaded, productsLoaded } from "../actions/actions";
+import strings from "../localization/Strings";
 import StorageService from "../services/StorageService";
 
 export const data = [];
 const { width, height } = Layout;
 
 class Products extends Component {
+	state = {
+		loading: false,
+		search: [],
+		searching: false,
+		pageIndex: 1,
+		isTile: false,
+		refreshing: false
+	};
 	componentDidMount() {
 		this.setState({ ...this.state, loading: true });
 		let categoryId = this.props.navigation.getParam("categoryId");
 		this.props.dispatch(favoritesLoaded(StorageService.getFavorites()));
 		this.props.dispatch(
-			populateProducts(categoryId, () =>
-				this.setState({ ...this.state, loading: false })
-			)
+			populateProducts(categoryId, () => {
+				this.setState({ ...this.state, loading: false });
+				this.props.dispatch(populateCities());
+			})
 		);
 	}
-	state = { loading: false, search: [], searching: false };
 
 	updateFavorites = () => {
 		this.props.dispatch(favoritesLoaded(StorageService.getFavorites()));
 		StorageService.saveChanges();
 		this.setState({ ...this.state, searching: true }, () =>
 			this.setState({ ...this.state, searching: false })
+		);
+	};
+
+	refresh = () => {
+		this.setState({ ...this.state, refreshing: true });
+		let categoryId = this.props.navigation.getParam("categoryId");
+		this.props.dispatch(
+			populateProducts(categoryId, () => {
+				this.setState({ ...this.state, refreshing: false });
+			})
+		);
+	};
+
+	loadMore = () => {
+		this.setState(
+			{ ...this.state, pageIndex: this.state.pageIndex + 1 },
+			() => {
+				api.product.getProducts(this.state.pageIndex).then(res => {
+					this.props.dispatch(
+						productsLoaded([
+							...this.props.products,
+							...res.data.data
+						])
+					);
+				});
+			}
 		);
 	};
 
@@ -56,34 +95,86 @@ class Products extends Component {
 		});
 	};
 
+	openModal = () => {
+		let { changeOrientation, filter } = this;
+		let { isTile } = this.state;
+		let categoryId = this.props.navigation.getParam("categoryId");
+		let params = { changeOrientation, isTile };
+		if (categoryId || categoryId !== "") {
+			params = { changeOrientation, categoryId, isTile };
+		}
+		params = { ...params, filter };
+		this.props.navigation.navigate("Filter", params);
+	};
+
+	changeOrientation = val => {
+		this.setState({ ...this.state, searching: true, isTile: val }, () =>
+			this.setState({ ...this.state, searching: false })
+		);
+	};
+
+	filter = data => {};
+
+	pickCity = e => {
+		this.setState({ ...this.state, loading: true });
+		api.product.postSearch({ city_id: e }).then(res => {
+			this.setState({
+				...this.state,
+				search: res.data.data,
+				searching: true,
+				loading: false
+			});
+		});
+	};
+
 	render() {
-		let { products, favorites, navigation } = this.props;
-		let { loading, searching, search } = this.state;
-		let { updateFavorites } = this;
+		let { products, favorites, navigation, cities } = this.props;
+		let { loading, searching, search, isTile } = this.state;
+		let {
+			updateFavorites,
+			search: searchFunc,
+			openModal,
+			changeOrientation,
+			pickCity,
+			filter
+		} = this;
 		return (
 			<React.Fragment>
 				<Header
-					name="Товары и услуги"
+					name={strings.productsAndServices}
 					main
 					openDrawer={navigation.openDrawer}
-					{...{ search: this.search }}
+					{...{
+						search: searchFunc,
+						openModal,
+						cities,
+						pickCity
+					}}
 				/>
 				<FlatList
+					key={isTile ? "h" : "v"}
 					extraData={loading}
 					showsVerticalScrollIndicator={false}
 					style={{
 						backgroundColor: Colors.lightGray,
 						paddingBottom: 30
 					}}
+					onEndReached={this.loadMore}
+					onEndReachedThreshold={0.5}
+					initialNumToRender={20}
+					onRefresh={this.refresh}
+					refreshing={this.state.refreshing}
 					contentContainerStyle={{ paddingBottom: 30 }}
-					numColumns={2}
+					numColumns={isTile ? 1 : 2}
 					data={searching ? search : products}
 					renderItem={({ item }) => (
 						<ProductItem
+							full
 							{...{
 								item,
 								updateFavorites,
-								isFavorite: StorageService.isFavorite(item)
+								isFavorite: StorageService.isFavorite(item),
+								horizontal: isTile
 							}}
 						/>
 					)}
@@ -107,7 +198,7 @@ class Products extends Component {
 											fontSize: 18
 										}}
 									>
-										Объявления не существует
+										{strings.adsDoNotExist}
 									</Text>
 								</View>
 							);
@@ -165,6 +256,10 @@ class Products extends Component {
 	}
 }
 
-const mapStateToProps = ({ products, favorites }) => ({ products, favorites });
+const mapStateToProps = ({ products, favorites, cities }) => ({
+	products,
+	favorites,
+	cities
+});
 
 export default connect(mapStateToProps)(Products);

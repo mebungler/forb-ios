@@ -15,10 +15,11 @@ import Colors from "../constants/Colors";
 import RoundInput from "./RoundInput";
 const { width } = Dimensions.get("window");
 import { urlResolve } from "../api/api";
+import Picker from "react-native-picker-select";
 
 export class ListHeaderComponent extends React.Component {
 	render() {
-		let { search = () => {} } = this.props;
+		let { search = () => {}, openModal = () => {} } = this.props;
 		return (
 			<React.Fragment>
 				<RoundInput
@@ -35,6 +36,7 @@ export class ListHeaderComponent extends React.Component {
 					onSubmitEditing={({ nativeEvent }) =>
 						search(nativeEvent.text)
 					}
+					onRightIconPress={openModal}
 					returnKeyType="search"
 				/>
 			</React.Fragment>
@@ -153,18 +155,25 @@ export class Header extends React.Component {
 				<View
 					style={{
 						flexDirection: "row",
-						flex: 1,
-						justifyContent: "flex-end"
+						justifyContent: "flex-end",
+						paddingBottom: 5
 					}}
 				>
-					<TouchableWithoutFeedback onPress={() => openDrawer}>
+					<Picker
+						hideIcon={true}
+						placeholder={{ value: null, label: "Выберите город" }}
+						items={this.props.cities}
+						onValueChange={(val, id) => {
+							this.props.pickCity(val);
+						}}
+					>
 						<Icon
 							size={20}
 							style={{ marginLeft: 25 }}
 							name="map-marker"
 							color="white"
 						/>
-					</TouchableWithoutFeedback>
+					</Picker>
 					<TouchableWithoutFeedback
 						onPress={() => {
 							NavigationService.toggleDrawer();
@@ -201,7 +210,8 @@ export class Header extends React.Component {
 			user,
 			clickable,
 			transparent,
-			search
+			search,
+			openModal
 		} = this.props;
 		let paddingBottom = !user ? 30 : 15;
 		if (main) paddingBottom = 5;
@@ -243,7 +253,8 @@ export class Header extends React.Component {
 									alignItems: user ? "flex-start" : "center",
 									justifyContent: "center",
 									flex: 1,
-									marginLeft: user ? 8 : 0
+									marginLeft: user ? 8 : 0,
+									paddingBottom: 5
 								}}
 							>
 								<Text
@@ -260,7 +271,9 @@ export class Header extends React.Component {
 							</View>
 							{this.renderRight()}
 						</View>
-						{main && <ListHeaderComponent {...{ search }} />}
+						{main && (
+							<ListHeaderComponent {...{ search, openModal }} />
+						)}
 					</View>
 				</View>
 			</>

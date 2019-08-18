@@ -4,7 +4,6 @@ import {
 	StyleSheet,
 	ImageBackground,
 	Image,
-	KeyboardAvoidingView,
 	Text,
 	SafeAreaView
 } from "react-native";
@@ -21,6 +20,7 @@ import { loginAsync } from "../actions/thunk";
 import { connect } from "react-redux";
 import NavigationService from "../services/NavigationService";
 import StorageService from "../services/StorageService";
+import strings from "../localization/Strings";
 
 class Login extends React.Component {
 	state = {
@@ -32,11 +32,10 @@ class Login extends React.Component {
 	};
 	login = () => {
 		let { phone, password } = this.state;
-		console.warn(phone);
 		if (phone === "" || password === "") {
 			this.setState({
 				...this.state,
-				error: { phone: "Заполните поле" }
+				error: { phone: strings.fill }
 			});
 			return;
 		}
@@ -44,6 +43,7 @@ class Login extends React.Component {
 		this.props.dispatch(
 			loginAsync({ phone, password }, res => {
 				if (res.status === 200) {
+					console.warn(res.data);
 					NavigationService.navigate("Main");
 					setTimeout(
 						() => this.setState({ ...this.state, status: "idle" }),
@@ -80,7 +80,6 @@ class Login extends React.Component {
 						<RoundInput
 							transparent
 							onTextChange={(key, val) => {
-								console.warn(val);
 								this.setState({
 									...this.state,
 									[key]: val,
@@ -95,7 +94,7 @@ class Login extends React.Component {
 								/>
 							)}
 							textContentType="telephoneNumber"
-							placeholder="+998991234567"
+							placeholder="998 ** *** ** **"
 							rightIcon={() => (
 								<Feather
 									name="x"
@@ -162,7 +161,7 @@ class Login extends React.Component {
 								checkedColor={Colors.pink}
 								iconType="material-community"
 								checkedIcon="circle-slice-8"
-								title="Запомнить"
+								title={strings.remember}
 								unchackedColor={Colors.pink}
 								uncheckedIcon={"checkbox-blank-circle-outline"}
 								textStyle={{
@@ -183,14 +182,14 @@ class Login extends React.Component {
 										fontWeight: "bold"
 									}}
 								>
-									Забыли пароль?
+									{strings.forgot}
 								</Text>
 							</View>
 						</View>
 						<RoundButton
 							status={this.state.status}
 							fill
-							text="Войти"
+							text={strings.login}
 							bold
 							color={Colors.white}
 							animated
@@ -206,7 +205,7 @@ class Login extends React.Component {
 										marginTop: 15
 									}}
 								>
-									{this.state.error.email}
+									{this.state.error.phone}
 								</Text>
 								<Text
 									style={{
@@ -226,7 +225,7 @@ class Login extends React.Component {
 						}}
 					>
 						<Text style={{ color: Colors.white }}>
-							Все еще нет аккаунта?
+							{strings.noAccount}
 						</Text>
 						<Text
 							style={{
@@ -239,7 +238,7 @@ class Login extends React.Component {
 								navigation.navigate("Register");
 							}}
 						>
-							Регистрация
+							{strings.checkIn}
 						</Text>
 					</View>
 					<View style={{ alignItems: "center" }}>
@@ -254,20 +253,31 @@ class Login extends React.Component {
 								navigation.navigate("Main");
 							}}
 						>
-							Войдите без регистрации
+							{strings.withoutRegistration}
 						</Text>
 					</View>
 					<Text
 						style={{
 							padding: 15,
 							fontWeight: "100",
-							paddingBottom: 30,
 							color: Colors.white,
-							textAlign: "center"
+							textAlign: "center",
+							paddingBottom: 0
 						}}
 					>
-						Входя в раздел Мой пофил, вы принимаете Условия
-						использования приложения
+						{strings.i}
+					</Text>
+					<Text
+						style={{
+							padding: 15,
+							fontWeight: "100",
+							paddingBottom: 30,
+							color: Colors.pink,
+							textAlign: "center",
+							paddingTop: 0
+						}}
+					>
+						{strings.agreement}
 					</Text>
 				</View>
 			</ImageBackground>

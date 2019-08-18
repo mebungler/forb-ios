@@ -5,17 +5,21 @@ import ProductItem from "./ProductItem";
 import { connect } from "react-redux";
 import Colors from "../constants/Colors";
 
-import { populateFavorites } from "../actions/thunk";
+import { favoritesLoaded } from "../actions/actions";
+
+import StorageService from "../services/StorageService";
 
 import Layout from "../constants/Layout";
 
+import strings from "../localization/Strings";
 const { width, height } = Layout;
 
 class Favorites extends Component {
 	componentDidMount() {
-		this.props.dispatch(populateFavorites());
+		this.props.dispatch(favoritesLoaded(StorageService.getFavorites()));
 	}
-	updateFavorites = () => this.props.dispatch(populateFavorites());
+	updateFavorites = () =>
+		this.props.dispatch(favoritesLoaded(StorageService.getFavorites()));
 	render() {
 		let { favorites } = this.props;
 		let { updateFavorites } = this;
@@ -48,7 +52,7 @@ class Favorites extends Component {
 							}}
 						>
 							<Text style={{ color: Colors.gray, fontSize: 24 }}>
-								Нет избранных
+								{strings.noFavorites}
 							</Text>
 						</View>
 					)}

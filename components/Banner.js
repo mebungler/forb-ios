@@ -5,7 +5,9 @@ import {
 	View,
 	Animated,
 	ImageBackground,
-	StyleSheet
+	StyleSheet,
+	TouchableWithoutFeedback,
+	Linking
 } from "react-native";
 import Layout from "../constants/Layout";
 import Colors from "../constants/Colors";
@@ -16,7 +18,14 @@ const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 
 let { width } = Layout;
 
-const Banner = ({ images, style, type = "default", imageStyle, animated }) => {
+const Banner = ({
+	images,
+	style,
+	type = "default",
+	imageStyle,
+	animated,
+	onPress
+}) => {
 	let [indicatorIndex, setIndicatorIndex] = useState(0);
 	let [indicatorWidth, setIndicatorWidth] = useState(-1);
 	let [indicatorOffset, setIndicatorOffset] = useState(-1);
@@ -34,7 +43,11 @@ const Banner = ({ images, style, type = "default", imageStyle, animated }) => {
 				banner.scrollTo({
 					x: val
 				});
-				setIndicatorIndex(indicatorIndex + 1);
+				setIndicatorIndex(
+					indicatorIndex + 1 === images.length
+						? 0
+						: indicatorIndex + 1
+				);
 		  }, 3000)
 		: {};
 	getImageStyle = () => {
@@ -124,21 +137,35 @@ const Banner = ({ images, style, type = "default", imageStyle, animated }) => {
 			>
 				{images &&
 					images.map((e, key) => (
-						<ImageBackground
-							key={key}
-							source={{ uri: urlResolve(e) }}
-							style={getImageStyle()}
+						<TouchableWithoutFeedback
+							onPress={() => {
+								if (type === "notDefault") {
+									onPress(indicatorIndex);
+									return;
+								}
+								if (e.link) {
+									Linking.openURL(e.link);
+								}
+							}}
 						>
-							{type === "default" && (
-								<View
-									style={{
-										...StyleSheet.absoluteFillObject,
-										backgroundColor: Colors.black,
-										opacity: 0.3
-									}}
-								/>
-							)}
-						</ImageBackground>
+							<ImageBackground
+								key={key}
+								source={{
+									uri: urlResolve(animated ? e.photo : e)
+								}}
+								style={getImageStyle()}
+							>
+								{type === "default" && (
+									<View
+										style={{
+											...StyleSheet.absoluteFillObject,
+											backgroundColor: Colors.black,
+											opacity: 0.3
+										}}
+									/>
+								)}
+							</ImageBackground>
+						</TouchableWithoutFeedback>
 					))}
 			</ScrollView>
 			<View

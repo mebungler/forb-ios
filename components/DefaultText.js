@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from "react";
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, TextInput } from "react-native";
 
 class DefaultText extends Component {
     render() {
@@ -10,7 +10,8 @@ class DefaultText extends Component {
             name,
             text,
             style,
-            editable
+            editable,
+            onChange
         } = this.props;
         return (
             <View
@@ -51,15 +52,16 @@ class DefaultText extends Component {
                         >
                             {name}
                         </Text>
-                        <Text
+                        <TextInput
+                            onChangeText={onChange}
+                            value={text}
+                            underlineColorAndroid="transparent"
                             style={{
                                 fontWeight: "bold",
                                 color: "black",
                                 fontSize: 16
                             }}
-                        >
-                            {text}
-                        </Text>
+                        />
                     </View>
                     <View
                         style={{

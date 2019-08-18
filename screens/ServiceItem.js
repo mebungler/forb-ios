@@ -16,8 +16,11 @@ const ServiceItem = ({ item }) => {
 	return (
 		<TouchableWithoutFeedback
 			onPress={() => {
+				if (!item.link) return;
 				if (item.link.indexOf("http") === -1) {
 					Linking.openURL("http://" + item.link);
+				} else {
+					Linking.openURL(item.link);
 				}
 			}}
 		>

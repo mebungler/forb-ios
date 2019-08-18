@@ -13,9 +13,16 @@ import Layout from "../constants/Layout";
 import NavigationService from "../services/NavigationService";
 import api, { urlResolve } from "../api/api";
 import StorageService from "../services/StorageService";
+import strings from "../localization/Strings";
 
 let { width } = Layout;
-const ProductItem = ({ item, horizontal, isFavorite, updateFavorites }) => {
+const ProductItem = ({
+	item,
+	horizontal,
+	isFavorite,
+	updateFavorites,
+	full
+}) => {
 	if (!horizontal) {
 		return (
 			<TouchableWithoutFeedback
@@ -58,20 +65,22 @@ const ProductItem = ({ item, horizontal, isFavorite, updateFavorites }) => {
 								color: Colors.blue,
 								marginBottom: 10
 							}}
-							numberOfLines={1}
+							numberOfLines={item.price ? 1 : 2}
 						>
 							{item.title}
 						</Text>
-						<Text
-							style={{
-								fontSize: 18,
-								fontWeight: "bold",
-								color: Colors.black
-							}}
-							numberOfLines={1}
-						>
-							{item.price}
-						</Text>
+						{item.price && (
+							<Text
+								style={{
+									fontSize: 18,
+									fontWeight: "bold",
+									color: Colors.black
+								}}
+								numberOfLines={1}
+							>
+								{item.price} UZS
+							</Text>
+						)}
 						<TouchableWithoutFeedback
 							onPress={() => {
 								StorageService.toggleItem(item);
@@ -96,7 +105,7 @@ const ProductItem = ({ item, horizontal, isFavorite, updateFavorites }) => {
 										marginLeft: 8
 									}}
 								>
-									Избранное
+									{strings.featured}
 								</Text>
 							</View>
 						</TouchableWithoutFeedback>
@@ -106,18 +115,29 @@ const ProductItem = ({ item, horizontal, isFavorite, updateFavorites }) => {
 		);
 	} else {
 		return (
-			<View
-				style={{
-					margin: 15,
-					marginLeft: 7.5,
-					borderRadius: 20,
-					backgroundColor: Colors.white,
-					padding: 15,
-					height: 100,
-					width: width - 60
-				}}
+			<TouchableWithoutFeedback
+				onPress={() =>
+					NavigationService.navigate("Product", {
+						item,
+						isFavorite,
+						updateFavorites
+					})
+				}
 			>
-				<View style={{ flexDirection: "row" }}>
+				<View
+					style={{
+						flexDirection: "row",
+						margin: 15,
+						marginLeft: 7.5,
+						borderRadius: 20,
+						backgroundColor: Colors.white,
+						padding: 15,
+						height: 100,
+						width: full ? width - 15 : width - 60,
+						marginTop: full ? 5 : 15,
+						marginBottom: full ? 5 : 15
+					}}
+				>
 					<Image
 						style={{ width: 100, height: 70 }}
 						source={{ uri: urlResolve(item.photo) }}
@@ -140,8 +160,20 @@ const ProductItem = ({ item, horizontal, isFavorite, updateFavorites }) => {
 							{item.price}
 						</Text>
 					</View>
+					<TouchableWithoutFeedback
+						onPress={() => {
+							StorageService.toggleItem(item);
+							updateFavorites();
+						}}
+					>
+						<Icon
+							name={isFavorite ? "staro" : "like"}
+							size={18}
+							color={isFavorite ? Colors.pink : Colors.gray}
+						/>
+					</TouchableWithoutFeedback>
 				</View>
-			</View>
+			</TouchableWithoutFeedback>
 		);
 	}
 };

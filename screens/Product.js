@@ -7,17 +7,17 @@ import {
 	View,
 	Image,
 	SafeAreaView,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	Linking
 } from "react-native";
 import ImageHeader from "../components/ImageHeader";
 import Border from "../components/Border";
 import Colors from "../constants/Colors";
 import Icon from "../services/IconService";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import Layout from "../constants/Layout";
 import ChatItem from "./ChatItem";
 import RoundButton from "../components/RoundButton";
-import { data } from "./Products";
 import ProductItem from "./ProductItem";
 import api, { urlResolve } from "../api/api";
 import Banner from "../components/Banner";
@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import { routeChange, favoritesLoaded } from "../actions/actions";
 import NavigationService from "../services/NavigationService";
 import StorageService from "../services/StorageService";
+import strings from "../localization/Strings";
 
 let { width } = Layout;
 
@@ -34,13 +35,21 @@ class Product extends Component {
 		this.props.dispatch(
 			routeChange({
 				...this.props.route,
-				getter_id: user.user_id,
+				getter_id: user.user.id,
 				chat_id: user.id
 			})
 		);
 		let item = this.props.navigation.getParam("item");
+		api.product.view(item.id, "device").then(res => {
+			this.setState({ ...this.state, data: res.data.data.similar });
+		});
 	}
-	state = { priceVisible: false, phoneVisible: false };
+	state = {
+		priceVisible: false,
+		phoneVisible: false,
+		data: [],
+		contentVisible: false
+	};
 	value = new Animated.Value(0);
 	productsOfAuthor = () => {
 		let item = this.props.navigation.getParam("item");
@@ -50,11 +59,11 @@ class Product extends Component {
 		let item = this.props.navigation.getParam("item");
 		let { value, renderIndicators } = this;
 		let { navigation, favorites, isAuthorized } = this.props;
-		let { phoneVisible, priceVisible } = this.state;
+		let { phoneVisible, priceVisible, data, contentVisible } = this.state;
 		let { user } = item;
 		let isFavorite = favorites.find(e => e.id === item.id);
+		let images = [item.photo, ...item.gallery];
 		let {
-			gallery: images,
 			phone,
 			type,
 			id,
@@ -122,7 +131,7 @@ class Product extends Component {
 									color: Colors.white
 								}}
 							>
-								Карточка товара
+								{strings.cardProduct}
 							</Text>
 						</View>
 						<View
@@ -176,7 +185,18 @@ class Product extends Component {
 						}
 					])}
 				>
-					<Banner {...{ images }} />
+					<Banner
+						{...{
+							images,
+							onPress: index => {
+								NavigationService.navigate("ImageView", {
+									images,
+									imageIndex: index
+								});
+							},
+							type: "notDefault"
+						}}
+					/>
 					<View
 						style={{
 							margin: 15,
@@ -193,17 +213,19 @@ class Product extends Component {
 							}}
 						>
 							<View>
-								<Text
-									style={{
-										color: Colors.pink,
-										marginBottom: 8,
-										fontWeight: "bold",
-										fontSize: 18
-									}}
-								>
-									{price} UZS
-								</Text>
-								{priceVisible && (
+								{price && (
+									<Text
+										style={{
+											color: Colors.pink,
+											marginBottom: 8,
+											fontWeight: "bold",
+											fontSize: 18
+										}}
+									>
+										{price} UZS
+									</Text>
+								)}
+								{priceVisible && price_d && (
 									<Text
 										style={{
 											color: Colors.pink,
@@ -222,8 +244,8 @@ class Product extends Component {
 									}}
 								>
 									{type && type === 1
-										? "Торг уместен"
-										: "Оканчательная цена"}
+										? strings.bargaining
+										: strings.finalPrice}
 								</Text>
 							</View>
 							<TouchableWithoutFeedback
@@ -270,7 +292,7 @@ class Product extends Component {
 									fontWeight: "100"
 								}}
 							>
-								# {id}, размещено {date}
+								# {id}, {strings.posted} {date}
 							</Text>
 						</View>
 						<Text
@@ -283,7 +305,217 @@ class Product extends Component {
 						>
 							{title}
 						</Text>
+					</View>
+					<Text
+						style={{
+							color: Colors.black,
+							fontWeight: "bold",
+							fontSize: 18,
+							marginLeft: 15
+						}}
+					>
+						{strings.description}
+					</Text>
+					<View
+						style={{
+							margin: 15,
+							padding: 15,
+							backgroundColor: Colors.white,
+							borderRadius: 30
+						}}
+					>
+						<Text
+							numberOfLines={contentVisible ? null : 10}
+							style={{ lineHeight: 20 }}
+						>
+							{content}
+						</Text>
+						<View style={{ flexDirection: "row" }}>
+							<Text
+								style={{
+									fontWeight: "100",
+									color: Colors.darkGray,
+									marginBottom: 15,
+									marginTop: 10
+								}}
+							>
+								{strings.salesDepartment}:{" "}
+							</Text>
+							<TouchableWithoutFeedback
+								onPress={() => {
+									if (!phoneVisible) {
+										api.product.viewPhone({
+											id
+										});
+									}
+									if (phoneVisible) {
+										Linking.openURL(
+											`tel:${item.phone.split(",")[0]}`
+										);
+									}
+									this.setState({
+										...this.state,
+										phoneVisible: true
+									});
+								}}
+							>
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: Colors.blue,
+										marginBottom: 15,
+										marginTop: 10,
+										flex: 1,
+										flexShrink: 1
+									}}
+								>
+									{phoneVisible
+										? item.phone
+										: strings.showNumber}
+								</Text>
+							</TouchableWithoutFeedback>
+						</View>
 						<Border fill />
+						<TouchableWithoutFeedback
+							onPress={() =>
+								this.setState({
+									...this.state,
+									contentVisible: !contentVisible
+								})
+							}
+						>
+							<View
+								style={{
+									flexDirection: "row",
+									justifyContent: "space-between",
+									marginTop: 15
+								}}
+							>
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: Colors.pink
+									}}
+								>
+									{strings.showMore}
+								</Text>
+								<Icon name="chevrondown" color={Colors.pink} />
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+					<ChatItem item={user} single />
+					<MapView
+						pitchEnabled={false}
+						rotateEnabled={false}
+						scrollEnabled={false}
+						zoomEnabled={false}
+						style={{ width, height: 300 }}
+						initialRegion={{
+							latitude: item.lat
+								? parseFloat(item.lat)
+								: 41.303624,
+							longitude: item.lng
+								? parseFloat(item.lat)
+								: 69.241629,
+							latitudeDelta: 0.01,
+							longitudeDelta: 0.01
+						}}
+					>
+						{item.lat && item.lng && (
+							<Marker
+								coordinate={{
+									latitude: item.lat
+										? parseFloat(item.lat)
+										: 41.303624,
+									longitude: item.lng
+										? parseFloat(item.lat)
+										: 69.241629
+								}}
+							/>
+						)}
+					</MapView>
+					<View
+						style={{
+							margin: 15,
+							marginTop: -30,
+							backgroundColor: Colors.blue,
+							borderRadius: 4,
+							padding: 15,
+							justifyContent: "center",
+							alignItems: "center"
+						}}
+					>
+						<Text
+							style={{
+								fontWeight: "100",
+								fontSize: 18,
+								color: Colors.white,
+								textAlign: "center"
+							}}
+						>
+							{item.city_name}
+						</Text>
+					</View>
+					<View style={{ padding: 15 }}>
+						<RoundButton
+							color={Colors.pink}
+							text={strings.authorAds}
+							big
+							bold
+							medium
+							icon={() => (
+								<Icon
+									name="name"
+									color={Colors.pink}
+									size={18}
+								/>
+							)}
+							onPress={this.productsOfAuthor}
+						/>
+					</View>
+					{data && data.length > 0 && (
+						<React.Fragment>
+							<Text
+								style={{
+									color: Colors.black,
+									fontWeight: "bold",
+									fontSize: 18,
+									marginLeft: 15
+								}}
+							>
+								{strings.similarAds}
+							</Text>
+							<ScrollView
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								style={{ paddingBottom: 30, paddingLeft: 15 }}
+							>
+								{data &&
+									data.map((e, key) => (
+										<ProductItem
+											item={e}
+											{...{ key }}
+											horizontal
+										/>
+									))}
+							</ScrollView>
+						</React.Fragment>
+					)}
+				</Animated.ScrollView>
+			</View>
+		);
+	}
+}
+
+const mapStateToProps = ({ route, user, favorites }) => {
+	let isAuthorized = false;
+	if (Object.keys(user).length > 1) isAuthorized = true;
+	return { route, favorites, isAuthorized };
+};
+
+export default connect(mapStateToProps)(Product);
+
+/*<Border fill />
 						{properties &&
 							properties.map((e, key) => (
 								<View
@@ -331,169 +563,4 @@ class Product extends Component {
 								Показать еще
 							</Text>
 							<Icon name="chevrondown" color={Colors.pink} />
-						</View>
-					</View>
-					<Text
-						style={{
-							color: Colors.black,
-							fontWeight: "bold",
-							fontSize: 18,
-							marginLeft: 15
-						}}
-					>
-						Описание
-					</Text>
-					<View
-						style={{
-							margin: 15,
-							padding: 15,
-							backgroundColor: Colors.white,
-							borderRadius: 30
-						}}
-					>
-						<Text
-							style={{
-								fontWeight: "100",
-								color: Colors.black,
-								lineHeight: 18
-							}}
-						>
-							{item.content}
-						</Text>
-						<View style={{ flexDirection: "row" }}>
-							<Text
-								style={{
-									fontWeight: "100",
-									color: Colors.darkGray,
-									marginBottom: 15,
-									marginTop: 10
-								}}
-							>
-								Отдел продаж:{" "}
-							</Text>
-							<TouchableWithoutFeedback
-								onPress={() => {
-									this.setState({
-										...this.state,
-										phoneVisible: !this.state.phoneVisible
-									});
-									if (phoneVisible) {
-										api.product.viewPhone({
-											id,
-											device_id: "device_id"
-										});
-									}
-								}}
-							>
-								<Text
-									style={{
-										fontWeight: "bold",
-										color: Colors.blue,
-										marginBottom: 15,
-										marginTop: 10
-									}}
-								>
-									{phoneVisible
-										? item.phone
-										: "показать номер"}
-								</Text>
-							</TouchableWithoutFeedback>
-						</View>
-						<Border fill />
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								marginTop: 15
-							}}
-						>
-							<Text
-								style={{
-									fontWeight: "bold",
-									color: Colors.pink
-								}}
-							>
-								Показать еще
-							</Text>
-							<Icon name="chevrondown" color={Colors.pink} />
-						</View>
-					</View>
-					<ChatItem item={user} single />
-					<MapView
-						pitchEnabled={false}
-						rotateEnabled={false}
-						scrollEnabled={false}
-						zoomEnabled={false}
-						style={{ width, height: 300 }}
-					/>
-					<View
-						style={{
-							margin: 15,
-							marginTop: -30,
-							backgroundColor: Colors.blue,
-							borderRadius: 4,
-							padding: 15,
-							justifyContent: "center",
-							alignItems: "center"
-						}}
-					>
-						<Text
-							style={{
-								fontWeight: "100",
-								fontSize: 18,
-								color: Colors.white,
-								textAlign: "center"
-							}}
-						>
-							{item.city_name}
-						</Text>
-					</View>
-					<View style={{ padding: 15 }}>
-						<RoundButton
-							color={Colors.pink}
-							text="Все объявления автора"
-							big
-							bold
-							medium
-							icon={() => (
-								<Icon
-									name="name"
-									color={Colors.pink}
-									size={18}
-								/>
-							)}
-							onPress={this.productsOfAuthor}
-						/>
-					</View>
-					<Text
-						style={{
-							color: Colors.black,
-							fontWeight: "bold",
-							fontSize: 18,
-							marginLeft: 15
-						}}
-					>
-						Схожие объявления
-					</Text>
-					<ScrollView
-						horizontal
-						showsHorizontalScrollIndicator={false}
-						style={{ paddingBottom: 30, paddingLeft: 15 }}
-					>
-						{data.map((e, key) => (
-							<ProductItem item={e} {...{ key }} horizontal />
-						))}
-					</ScrollView>
-				</Animated.ScrollView>
-			</View>
-		);
-	}
-}
-
-const mapStateToProps = ({ route, user, favorites }) => {
-	let isAuthorized = false;
-	if (Object.keys(user).length > 0) isAuthorized = true;
-	return { route, favorites, isAuthorized };
-};
-
-export default connect(mapStateToProps)(Product);
+						</View>*/

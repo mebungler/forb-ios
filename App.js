@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import NavigationService from "./services/NavigationService";
 import createNavigator from "./navigation/AppNavigator";
-
+import axios from "axios";
 import StorageService from "./services/StorageService";
-
+import { userLoggedOut } from "./actions/actions";
 import configureStore from "./store/configureStore";
 import { Provider } from "react-redux";
 
@@ -24,12 +24,25 @@ export default class App extends React.Component {
   async componentDidMount() {
     await StorageService.initialize();
     this.setState({ isLoading: false });
+    axios.interceptors.response.use(
+      res => res,
+      err => {
+        if (err.response.status === 401) {
+          store.dispatch(userLoggedOut());
+        }
+        return err;
+      }
+    );
+    axios.interceptors.request.use(res => {
+      res.headers["Content-Language"] = StorageService.getState().language;
+      return res;
+    });
   }
   render() {
     let AppNavigator = createNavigator(
-      Object.keys(StorageService.getState()).length > 0
+      Object.keys(StorageService.getState()).length > 1
     );
-    if (Object.keys(StorageService.getState()).length > 0) {
+    if (Object.keys(StorageService.getState()).length > 1) {
       store.dispatch(userLoggedIn(StorageService.getState()));
     }
     return (

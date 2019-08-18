@@ -15,6 +15,8 @@ export const user = (state = {}, action) => {
 			StorageService.setState(action.user);
 			StorageService.saveChanges();
 			return { ...action.user };
+		case "USER_EDITING":
+			return { ...action.user };
 		default:
 			return state;
 	}

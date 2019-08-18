@@ -9,7 +9,12 @@ import {
 } from "react-native";
 
 import { connect } from "react-redux";
-import { userLoggedOut } from "../actions/actions";
+import { userLoggedOut, userLoggedIn } from "../actions/actions";
+import {
+	populateCategories,
+	populateServices,
+	populateCities
+} from "../actions/thunk";
 
 import Icon from "../services/IconService";
 import NavigationService from "../services/NavigationService";
@@ -22,11 +27,34 @@ import DrawerItem from "./DrawerItem";
 import { urlResolve } from "../api/api";
 
 import logo from "../assets/images/logo.png";
+import strings from "../localization/Strings";
 
 class DrawerContent extends Component {
+	changeLanguage = language => {
+		strings.setLanguage(language);
+		this.props.dispatch(
+			userLoggedIn({ ...this.props.user, language: language })
+		);
+		this.props.dispatch(
+			populateCategories(() =>
+				this.props.dispatch(populateServices(() => populateCities()))
+			)
+		);
+	};
 	render() {
-		let user = StorageService.getState();
-		let isAuthorized = Object.keys(user).length > 0;
+		let { chats, user } = this.props;
+		let isAuthorized = Object.keys(user).length > 1;
+		if (!isAuthorized) {
+			user = StorageService.getState();
+			isAuthorized = Object.keys(user).length > 1;
+		}
+		let count = 0;
+		let lang = user.language;
+		if (!lang || lang === "") {
+			StorageService.setState({ ...user, language: "ru" });
+			this.props.dispatch(userLoggedIn(StorageService.getState()));
+		}
+		chats.map(e => (count += e.messages));
 		return (
 			<>
 				<View style={{ paddingTop: 20, backgroundColor: Colors.blue }}>
@@ -108,8 +136,9 @@ class DrawerContent extends Component {
 					)}
 
 					<DrawerItem
-						text="Сообщения"
+						text={strings.messages}
 						iconName="chat"
+						notifications={count}
 						onPress={() => {
 							NavigationService.toggleDrawer();
 							NavigationService.navigate("Chats");
@@ -117,7 +146,7 @@ class DrawerContent extends Component {
 					/>
 
 					<DrawerItem
-						text="Избранные"
+						text={strings.featured}
 						iconName="like"
 						onPress={() => {
 							NavigationService.toggleDrawer();
@@ -125,7 +154,7 @@ class DrawerContent extends Component {
 						}}
 					/>
 					<DrawerItem
-						text="Моя страница"
+						text={strings.myPage}
 						iconName="name"
 						onPress={() => {
 							NavigationService.toggleDrawer();
@@ -133,7 +162,7 @@ class DrawerContent extends Component {
 						}}
 					/>
 					<DrawerItem
-						text="Сервисы"
+						text={strings.services}
 						iconName="organization"
 						onPress={() => {
 							NavigationService.toggleDrawer();
@@ -150,9 +179,92 @@ class DrawerContent extends Component {
 						backgroundColor: Colors.blue
 					}}
 				>
+					<View
+						style={{
+							flexDirection: "row",
+							paddingBottom: 15,
+							justifyContent: "space-around"
+						}}
+					>
+						<TouchableWithoutFeedback
+							onPress={() => this.changeLanguage("ru")}
+						>
+							<View
+								style={{
+									backgroundColor:
+										lang === "ru"
+											? Colors.pink
+											: Colors.blue,
+									padding: 10,
+									margin: 10,
+									borderRadius: 5
+								}}
+							>
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: Colors.white,
+										fontSize: 18
+									}}
+								>
+									ru
+								</Text>
+							</View>
+						</TouchableWithoutFeedback>
+						<TouchableWithoutFeedback
+							onPress={() => this.changeLanguage("uz")}
+						>
+							<View
+								style={{
+									backgroundColor:
+										lang === "uz"
+											? Colors.pink
+											: Colors.blue,
+									padding: 10,
+									margin: 10,
+									borderRadius: 5
+								}}
+							>
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: Colors.white,
+										fontSize: 18
+									}}
+								>
+									uz
+								</Text>
+							</View>
+						</TouchableWithoutFeedback>
+						<TouchableWithoutFeedback
+							onPress={() => this.changeLanguage("en")}
+						>
+							<View
+								style={{
+									backgroundColor:
+										lang === "en"
+											? Colors.pink
+											: Colors.blue,
+									padding: 10,
+									margin: 10,
+									borderRadius: 5
+								}}
+							>
+								<Text
+									style={{
+										fontWeight: "bold",
+										color: Colors.white,
+										fontSize: 18
+									}}
+								>
+									en
+								</Text>
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
 					{isAuthorized && (
 						<DrawerItem
-							text="Выход"
+							text={strings.logOut}
 							iconName="logout"
 							onPress={() => {
 								NavigationService.toggleDrawer();
@@ -166,44 +278,6 @@ class DrawerContent extends Component {
 	}
 }
 
-export default connect(null)(DrawerContent);
+const mapStateToProps = ({ chats, user }) => ({ chats, user });
 
-// <DrawerItem
-// 						text="Регистрация фирмы"
-// 						iconName="register"
-// 						onPress={() => {
-// 							NavigationService.toggleDrawer();
-// 						}}
-// 					/>
-// <DrawerItem
-// 	text="Дабавить объявление"
-// 	iconName="plus_ad"
-// 	onPress={() => {
-// 		NavigationService.toggleDrawer();
-// 		NavigationService.navigate("AddProduct");
-// 	}}
-// />
-// <DrawerItem
-// 						text="Оплата"
-// 						iconName="payment"
-// 						onPress={() => {
-// 							NavigationService.toggleDrawer();
-// 							NavigationService.navigate("Payment");
-// 						}}
-// 					/>
-// 					<DrawerItem
-// 						text="Статистика"
-// 						iconName="statistics"
-// 						onPress={() => {
-// 							NavigationService.toggleDrawer();
-// 							NavigationService.navigate("Statistics");
-// 						}}
-// 					/>
-// 					<DrawerItem
-// 						text="Мои объявления"
-// 						iconName="ads"
-// 						onPress={() => {
-// 							NavigationService.toggleDrawer();
-// 							NavigationService.navigate("Ads");
-// 						}}
-// 					/>
+export default connect(mapStateToProps)(DrawerContent);

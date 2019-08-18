@@ -6,6 +6,7 @@ import { populateServices } from "../actions/thunk";
 import ServiceItem from "./ServiceItem";
 import { connect } from "react-redux";
 import Layout from "../constants/Layout";
+import strings from "../localization/Strings";
 
 const { width, height } = Layout;
 
@@ -52,7 +53,7 @@ class Services extends Component {
 										fontSize: 18
 									}}
 								>
-									Сервисы пока не существует
+									{strings.servicesDoNotExist}
 								</Text>
 							</View>
 						);

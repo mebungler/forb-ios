@@ -619,6 +619,34 @@
       ]
     },
     {
+      "uid": "e6a985c08428b22835f83ab245683ce9",
+      "css": "tile",
+      "code": 59464,
+      "src": "custom_icons",
+      "selected": true,
+      "svg": {
+        "path": "M125 1000H0V562.5H1000V1000H125ZM875 750V687.5H125V875H875V750ZM0 312.5V0H1000V437.5H0V312.5ZM125 250V312.5H875V125H125V250Z",
+        "width": 1000
+      },
+      "search": [
+        "tile"
+      ]
+    },
+    {
+      "uid": "c337dac4672c70fe6481e661f033c772",
+      "css": "list",
+      "code": 59463,
+      "src": "custom_icons",
+      "selected": true,
+      "svg": {
+        "path": "M562.5 1000V562.5H1000V1000H562.5ZM875 687.5H687.5V875H875V687.5ZM562.5 312.5V0H1000V437.5H562.5V312.5ZM687.5 250V312.5H875V125H687.5V250ZM0 1000V562.5H437.5V1000H0ZM312.5 750V687.5H125V875H312.5V750ZM0 437.5V0H437.5V437.5H0ZM312.5 125H125V312.5H312.5V125Z",
+        "width": 1000
+      },
+      "search": [
+        "list"
+      ]
+    },
+    {
       "uid": "8db178b5f9dbdcc68c02140ad7440f31",
       "css": "user",
       "code": 59394,
