@@ -69,7 +69,7 @@ class Product extends Component {
 			id,
 			date,
 			title,
-			properties,
+			filter: properties,
 			price,
 			content,
 			description,
@@ -305,6 +305,56 @@ class Product extends Component {
 						>
 							{title}
 						</Text>
+
+						<Border fill />
+						{properties &&
+							properties.map((e, key) => (
+								<View
+									{...{ key }}
+									style={{
+										flexDirection: "row",
+										justifyContent: "space-between",
+										marginTop: 15
+									}}
+								>
+									<Text
+										style={{
+											color: Colors.darkGray,
+											fontSize: 18,
+											fontWeight: "bold"
+										}}
+									>
+										{e.name}
+									</Text>
+									<Text
+										style={{
+											color: Colors.black,
+											fontSize: 18,
+											fontWeight: "bold"
+										}}
+									>
+										{e.value}
+									</Text>
+								</View>
+							))}
+						<Border fill style={{ marginTop: 15 }} />
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "space-between",
+								marginTop: 15
+							}}
+						>
+							<Text
+								style={{
+									fontWeight: "bold",
+									color: Colors.pink
+								}}
+							>
+								{strings.showMore}
+							</Text>
+							<Icon name="chevrondown" color={Colors.pink} />
+						</View>
 					</View>
 					<Text
 						style={{
@@ -515,52 +565,4 @@ const mapStateToProps = ({ route, user, favorites }) => {
 
 export default connect(mapStateToProps)(Product);
 
-/*<Border fill />
-						{properties &&
-							properties.map((e, key) => (
-								<View
-									{...{ key }}
-									style={{
-										flexDirection: "row",
-										justifyContent: "space-between",
-										marginTop: 15
-									}}
-								>
-									<Text
-										style={{
-											color: Colors.darkGray,
-											fontSize: 18,
-											fontWeight: "bold"
-										}}
-									>
-										{e.key}
-									</Text>
-									<Text
-										style={{
-											color: Colors.black,
-											fontSize: 18,
-											fontWeight: "bold"
-										}}
-									>
-										{e.value}
-									</Text>
-								</View>
-							))}
-						<Border fill style={{ marginTop: 15 }} />
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								marginTop: 15
-							}}
-						>
-							<Text
-								style={{
-									fontWeight: "bold",
-									color: Colors.pink
-								}}
-							>
-								Показать еще
-							</Text>
-							<Icon name="chevrondown" color={Colors.pink} />
-						</View>*/
+/**/

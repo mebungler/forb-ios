@@ -1,5 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, ScrollView, View, Text, Image } from "react-native";
+import {
+	StyleSheet,
+	ScrollView,
+	View,
+	Text,
+	Image,
+	TouchableWithoutFeedback
+} from "react-native";
 import Colors from "../constants/Colors";
 import Icon from "../services/IconService";
 import { CheckBox } from "react-native-elements";
@@ -11,6 +18,9 @@ import money from "../assets/images/money.png";
 import click from "../assets/images/click.png";
 import Layout from "../constants/Layout";
 import RoundButton from "../components/RoundButton";
+import strings from "../localization/Strings";
+import api from "../api/api";
+import StorageService from "../services/StorageService";
 
 let { width } = Layout;
 
@@ -21,9 +31,14 @@ class Payment extends Component {
 		bonuses: "3",
 		cashbacks: "0",
 		payment: 0,
-		payments: ["6 000 сум", "12 000 сум", "24 000 сум"],
-		paymentType: 0
+		payments: [],
+		paymentType: 4
 	};
+	componentDidMount() {
+		api.main.getTariff().then(res => {
+			this.setState({ ...this.state, payments: res.data });
+		});
+	}
 	render() {
 		let {
 			balance,
@@ -36,138 +51,6 @@ class Payment extends Component {
 		} = this.state;
 		return (
 			<ScrollView showsVerticalScrollIndicator={false}>
-				<View
-					style={{
-						margin: 15,
-						padding: 15,
-						borderRadius: 20,
-						shadowColor: Colors.gray,
-						shadowOpacity: 1,
-						backgroundColor: Colors.white,
-						shadowOffset: { heigth: 5 }
-					}}
-				>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginBottom: 15
-						}}
-					>
-						<Text style={{ color: Colors.darkGray, fontSize: 18 }}>
-							Баланс
-						</Text>
-						<Image
-							style={{ height: 30, width: 100 }}
-							source={logoText}
-						/>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginBottom: 30
-						}}
-					>
-						<Text
-							style={{
-								color: Colors.pink,
-								fontSize: 20,
-								fontWeight: "bold",
-								fontSize: 18
-							}}
-						>
-							{balance}
-						</Text>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginBottom: 15
-						}}
-					>
-						<Text
-							style={{
-								color: Colors.darkGray,
-								fontSize: 18
-							}}
-						>
-							Текущий счет
-						</Text>
-						<Text
-							style={{
-								color: Colors.black,
-								fontWeight: "bold",
-								fontSize: 18
-							}}
-						>
-							{currentBalance}
-						</Text>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginBottom: 15
-						}}
-					>
-						<Text
-							style={{
-								color: Colors.darkGray,
-								fontSize: 18
-							}}
-						>
-							Бонусы
-						</Text>
-						<Text
-							style={{
-								color: Colors.black,
-								fontWeight: "bold",
-								fontSize: 18
-							}}
-						>
-							{bonuses}
-						</Text>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							marginBottom: 15
-						}}
-					>
-						<Text
-							style={{
-								color: Colors.darkGray,
-								fontSize: 18
-							}}
-						>
-							Возвраты
-						</Text>
-						<Text
-							style={{
-								color: Colors.black,
-								fontWeight: "bold",
-								fontSize: 18
-							}}
-						>
-							{cashbacks}
-						</Text>
-					</View>
-				</View>
-				<View
-					style={{ flexDirection: "row", justifyContent: "center" }}
-				>
-					<RoundButton
-						fill
-						color={Colors.blue}
-						big
-						bold
-						animated
-						text="Пополнить счет"
-					/>
-				</View>
 				<Text
 					style={{
 						margin: 15,
@@ -176,81 +59,101 @@ class Payment extends Component {
 						color: Colors.black
 					}}
 				>
-					Выбрать сумму платежа
+					{strings.paymentAmount}
 				</Text>
 				<ScrollView horizontal showsHorizontalScrollIndicator={false}>
 					{payments.map((e, i) => {
 						return (
-							<View
-								style={[
-									{
-										width: width - width / 3,
-										height: 300,
-										borderRadius: 20,
-										borderColor: Colors.blue,
-										borderWidth: payment === i ? 0.5 : 0,
-										justifyContent: "center",
-										alignItems: "center",
-										backgroundColor: Colors.white,
-										margin: 7.5,
-										marginLeft: i === 0 ? 15 : 7.5
-									},
-									payment === i
-										? {}
-										: {
-												shadowOpacity: 1,
-												shadowColor: Colors.gray,
-												shadowOffset: { height: 5 }
-										  }
-								]}
+							<TouchableWithoutFeedback
+								onPress={() =>
+									this.setState({
+										...this.state,
+										payment: i
+									})
+								}
 							>
-								<CheckBox
-									checked={payment === i}
-									containerStyle={{
-										backgroundColor: "transparent",
-										borderWidth: 0,
-										padding: 0,
-										margin: 0,
-										justifyContent: "flex-start"
-									}}
-									iconType="material-community"
-									checkedIcon="circle-slice-8"
-									checkedColor={Colors.blue}
-									uncheckedIcon="checkbox-blank-circle-outline"
-									textStyle={{
-										color: Colors.black,
-										fontWeight: "400"
-									}}
-									onPress={() =>
-										this.setState({
-											...this.state,
-											payment: i
-										})
-									}
-								/>
-								<Text
-									style={{
-										fontWeight: "bold",
-										color: Colors.black,
-										marginTop: 15
-									}}
+								<View
+									style={[
+										{
+											width: width - width / 3,
+											height: 320,
+											borderRadius: 20,
+											borderColor: Colors.blue,
+											borderWidth:
+												payment === i ? 0.5 : 0,
+											justifyContent: "center",
+											alignItems: "center",
+											backgroundColor: Colors.white,
+											margin: 7.5,
+											marginLeft: i === 0 ? 15 : 7.5
+										},
+										payment === i
+											? {}
+											: {
+													shadowOpacity: 1,
+													shadowColor: Colors.gray,
+													shadowOffset: { height: 5 }
+											  }
+									]}
 								>
-									{e}
-								</Text>
-								<Text
-									style={{
-										fontWeight: "100",
-										color: Colors.black,
-										marginBottom: 30
-									}}
-								>
-									Пополнение счета
-								</Text>
-								<Image
-									source={money}
-									style={{ width: 140, height: 140 }}
-								/>
-							</View>
+									<CheckBox
+										checked={payment === i}
+										containerStyle={{
+											backgroundColor: "transparent",
+											borderWidth: 0,
+											padding: 0,
+											margin: 0,
+											justifyContent: "flex-start"
+										}}
+										iconType="material-community"
+										checkedIcon="circle-slice-8"
+										checkedColor={Colors.blue}
+										uncheckedIcon="checkbox-blank-circle-outline"
+										textStyle={{
+											color: Colors.black,
+											fontWeight: "400"
+										}}
+										onPress={() =>
+											this.setState({
+												...this.state,
+												payment: i
+											})
+										}
+									/>
+									<Text
+										style={{
+											fontWeight: "bold",
+											color: Colors.black,
+											marginTop: 15
+										}}
+									>
+										{e.price}
+									</Text>
+									<Text
+										style={{
+											fontWeight: "bold",
+											color: Colors.black,
+											marginBottom: 30,
+											fontSize: 18
+										}}
+									>
+										{e.name}
+									</Text>
+									<Text
+										style={{
+											fontWeight: "100",
+											color: Colors.black,
+											marginBottom: 30
+										}}
+									>
+										{e.note}
+									</Text>
+									<Image
+										source={money}
+										style={{ width: 140, height: 140 }}
+									/>
+								</View>
+							</TouchableWithoutFeedback>
 						);
 					})}
 				</ScrollView>
@@ -262,9 +165,107 @@ class Payment extends Component {
 						color: Colors.black
 					}}
 				>
-					Выбрать способ оплаты
+					{strings.paymentMethod}
 				</Text>
 				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						borderColor: Colors.darkGray,
+						padding: 15
+					}}
+				>
+					<Image source={payme} style={{ width: 140, height: 40 }} />
+					<CheckBox
+						checked={paymentType === 4}
+						containerStyle={{
+							backgroundColor: "transparent",
+							borderWidth: 0,
+							padding: 0,
+							margin: 0,
+							justifyContent: "flex-start"
+						}}
+						iconType="material-community"
+						checkedIcon="circle-slice-8"
+						checkedColor={Colors.blue}
+						uncheckedIcon="checkbox-blank-circle-outline"
+						textStyle={{
+							color: Colors.black,
+							fontWeight: "400"
+						}}
+						onPress={() =>
+							this.setState({
+								...this.state,
+								paymentType: 4
+							})
+						}
+					/>
+				</View>
+				<View style={{ padding: 15, flexDirection: "row" }}>
+					<View
+						style={{
+							alignItems: "center",
+							justifyContent: "center"
+						}}
+					>
+						<Icon name="money" size={18} />
+					</View>
+					<View style={{ paddingLeft: 15 }}>
+						<Text
+							style={{
+								fontWeight: "100",
+								color: Colors.darkGray
+							}}
+						>
+							{strings.totalAmount}
+						</Text>
+						<Text style={{ fontWeight: "bold", fontSize: 18 }}>
+							{payments.length > 0 && payments[payment].price}
+						</Text>
+					</View>
+				</View>
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-around",
+						marginBottom: 30
+					}}
+				>
+					<RoundButton
+						fill
+						color={Colors.pink}
+						bold
+						big
+						medium
+						fillSize
+						text={strings.cancel}
+						onPress={this.props.navigation.goBack}
+					/>
+					<RoundButton
+						fillSize
+						fill
+						medium
+						color={Colors.blue}
+						bold
+						big
+						onPress={() =>
+							this.props.navigation.navigate("WebView", {
+								url: `http://forb.uz/payment?id=${
+									payments[payment].id
+								}&token=${StorageService.getState().token}`
+							})
+						}
+						text={strings.pay}
+					/>
+				</View>
+			</ScrollView>
+		);
+	}
+}
+
+export default Payment;
+
+/*<View
 					style={{
 						flexDirection: "row",
 						justifyContent: "space-between",
@@ -403,93 +404,139 @@ class Payment extends Component {
 							})
 						}
 					/>
-				</View>
-				<View
+				</View>*/
+
+// ************************************************************
+
+/*<View
 					style={{
-						flexDirection: "row",
-						justifyContent: "space-between",
-						borderColor: Colors.darkGray,
-						padding: 15
+						margin: 15,
+						padding: 15,
+						borderRadius: 20,
+						shadowColor: Colors.gray,
+						shadowOpacity: 1,
+						backgroundColor: Colors.white,
+						shadowOffset: { heigth: 5 }
 					}}
 				>
-					<Image source={payme} style={{ width: 140, height: 40 }} />
-					<CheckBox
-						checked={paymentType === 4}
-						containerStyle={{
-							backgroundColor: "transparent",
-							borderWidth: 0,
-							padding: 0,
-							margin: 0,
-							justifyContent: "flex-start"
-						}}
-						iconType="material-community"
-						checkedIcon="circle-slice-8"
-						checkedColor={Colors.blue}
-						uncheckedIcon="checkbox-blank-circle-outline"
-						textStyle={{
-							color: Colors.black,
-							fontWeight: "400"
-						}}
-						onPress={() =>
-							this.setState({
-								...this.state,
-								paymentType: 4
-							})
-						}
-					/>
-				</View>
-				<View style={{ padding: 15, flexDirection: "row" }}>
 					<View
 						style={{
-							alignItems: "center",
-							justifyContent: "center"
+							flexDirection: "row",
+							justifyContent: "space-between",
+							marginBottom: 15
 						}}
 					>
-						<Icon name="money" size={18} />
+						<Text style={{ color: Colors.darkGray, fontSize: 18 }}>
+							Баланс
+						</Text>
+						<Image
+							style={{ height: 30, width: 100 }}
+							source={logoText}
+						/>
 					</View>
-					<View style={{ paddingLeft: 15 }}>
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							marginBottom: 30
+						}}
+					>
 						<Text
 							style={{
-								fontWeight: "100",
-								color: Colors.darkGray
+								color: Colors.pink,
+								fontSize: 20,
+								fontWeight: "bold",
+								fontSize: 18
 							}}
 						>
-							Итоговая сумма
+							{balance}
 						</Text>
-						<Text style={{ fontWeight: "bold", fontSize: 18 }}>
-							{payments[payment]}
+					</View>
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							marginBottom: 15
+						}}
+					>
+						<Text
+							style={{
+								color: Colors.darkGray,
+								fontSize: 18
+							}}
+						>
+							Текущий счет
+						</Text>
+						<Text
+							style={{
+								color: Colors.black,
+								fontWeight: "bold",
+								fontSize: 18
+							}}
+						>
+							{currentBalance}
+						</Text>
+					</View>
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							marginBottom: 15
+						}}
+					>
+						<Text
+							style={{
+								color: Colors.darkGray,
+								fontSize: 18
+							}}
+						>
+							Бонусы
+						</Text>
+						<Text
+							style={{
+								color: Colors.black,
+								fontWeight: "bold",
+								fontSize: 18
+							}}
+						>
+							{bonuses}
+						</Text>
+					</View>
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+							marginBottom: 15
+						}}
+					>
+						<Text
+							style={{
+								color: Colors.darkGray,
+								fontSize: 18
+							}}
+						>
+							Возвраты
+						</Text>
+						<Text
+							style={{
+								color: Colors.black,
+								fontWeight: "bold",
+								fontSize: 18
+							}}
+						>
+							{cashbacks}
 						</Text>
 					</View>
 				</View>
 				<View
-					style={{
-						flexDirection: "row",
-						justifyContent: "space-around",
-						marginBottom: 30
-					}}
+					style={{ flexDirection: "row", justifyContent: "center" }}
 				>
 					<RoundButton
 						fill
-						color={Colors.pink}
-						bold
-						big
-						medium
-						fillSize
-						text="Отменить"
-					/>
-					<RoundButton
-						fillSize
-						fill
-						medium
 						color={Colors.blue}
-						bold
 						big
-						text="Оплатить"
+						bold
+						animated
+						text="Пополнить счет"
 					/>
-				</View>
-			</ScrollView>
-		);
-	}
-}
-
-export default Payment;
+				</View>*/

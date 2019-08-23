@@ -7,7 +7,9 @@ import {
 	KeyboardAvoidingView,
 	TouchableWithoutFeedback,
 	Platform,
-	PermissionsAndroid
+	PermissionsAndroid,
+	Dimensions,
+	Alert
 } from "react-native";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
@@ -55,12 +57,35 @@ class AddProduct extends Component {
 		subcategories: [],
 		regions: [],
 		region: -1,
-		filters: []
+		filters: [],
+		values: []
 	};
 	onChange = (index, item) => {
 		let properties = [...this.state.properties];
 		properties[index] = item;
 		this.setState({ ...this.state, properties });
+	};
+	fetchFilters = (id, clear) => {
+		api.category.filters(id).then(res => {
+			let filters = clear
+				? res.data.data.map(e => ({
+						...e,
+						label: e.name,
+						value: e.name
+				  }))
+				: [
+						...this.state.filters,
+						...res.data.data.map(e => ({
+							...e,
+							label: e.name,
+							value: e.name
+						}))
+				  ];
+			this.setState({
+				...this.state,
+				filters
+			});
+		});
 	};
 	add = e => {
 		this.setState({ ...this.state, gallery: [...this.state.gallery, e] });
@@ -103,7 +128,8 @@ class AddProduct extends Component {
 			regions,
 			region,
 			lat,
-			lng
+			lng,
+			filters
 		} = this.state;
 		let { cities, categories } = this.props;
 		let cat =
@@ -131,12 +157,22 @@ class AddProduct extends Component {
 			city_id: _city,
 			responsible_person,
 			lat,
-			lng
+			lng,
+			filters
 		};
 		api.product
 			.addProduct(data)
 			.then(res => {
 				this.setState({ ...this.state, status: "idle" });
+				if (res.status !== 200) {
+					Alert.alert(
+						strings.attention,
+						strings.didNotFill,
+						[{ text: "OK" }],
+						{ cancelable: true }
+					);
+					return;
+				}
 				this.props.navigation.navigate("Products");
 			})
 			.catch(res => {
@@ -202,9 +238,11 @@ class AddProduct extends Component {
 			isMine,
 			subcategories,
 			regions,
-			region
+			region,
+			filters,
+			values
 		} = this.state;
-		let { add, remove, pickLocation } = this;
+		let { add, remove, pickLocation, fetchFilters } = this;
 		let { cities, categories } = this.props;
 		return (
 			<ScrollView
@@ -255,6 +293,17 @@ class AddProduct extends Component {
 							api.category
 								.subCategories(categories[index - 1].id)
 								.then(res => {
+									fetchFilters(
+										categories[index - 1].id,
+										true
+									);
+									if (
+										!res.data ||
+										!res.data.data ||
+										res.data.data.length <= 0
+									) {
+										return;
+									}
 									let normData = res.data.data.map(e => ({
 										value: e.id,
 										label: e.name,
@@ -310,6 +359,11 @@ class AddProduct extends Component {
 											subcategories[i].data[index - 1].id
 										)
 										.then(res => {
+											fetchFilters(
+												subcategories[i].data[index - 1]
+													.id,
+												false
+											);
 											if (
 												res.data.data &&
 												res.data.data.length > 0
@@ -331,7 +385,9 @@ class AddProduct extends Component {
 														}
 													]
 												});
-											} else return;
+											} else {
+												return;
+											}
 										});
 									let subs = subcategories;
 									subs[i].value = index - 1;
@@ -522,11 +578,15 @@ class AddProduct extends Component {
 												onTextChange={(key, val) =>
 													this.setState({
 														...this.setState,
-														values: {
-															...this.state
-																.values,
-															[key]: val
-														}
+														filters: [
+															...filters,
+															{
+																...filters[
+																	index
+																],
+																value: val
+															}
+														]
 													})
 												}
 												style={{
@@ -537,8 +597,17 @@ class AddProduct extends Component {
 														Dimensions.get("window")
 															.width - 60,
 													paddingLeft: 30,
+													height: 50,
+													marginTop: 0,
+													padding: 0
+												}}
+												containerStyle={{
+													paddingLeft: 30,
+													paddingRight: 30,
 													marginBottom: 15,
-													height: 50
+													width:
+														Dimensions.get("window")
+															.width - 60
 												}}
 												main
 												placeholder={el.name}
@@ -557,9 +626,9 @@ class AddProduct extends Component {
 													/>
 												)}
 												selectedValue={
-													values[el.id]
-														? values[el.id]
-														: ""
+													el.value
+														? el.value
+														: el.name
 												}
 												placeholder={el.name}
 												data={
@@ -572,12 +641,12 @@ class AddProduct extends Component {
 												}
 												onValueChange={(val, i) => {
 													let {
-														values: f
+														filters: f
 													} = this.state;
-													f[el.id] = val;
+													f[index].value = val;
 													this.setState({
 														...this.state,
-														values: f
+														filters: f
 													});
 												}}
 												style={{
@@ -603,33 +672,6 @@ class AddProduct extends Component {
 										break;
 								}
 							})}
-					</View>
-					<View
-						style={{
-							flex: 1,
-							justifyContent: "flex-end",
-							flexDirection: "row",
-							paddingRight: 15,
-							paddingTop: 15
-						}}
-					>
-						<TouchableWithoutFeedback
-							onPress={() => {
-								this.setState({
-									...this.state,
-									properties: [
-										...this.state.properties,
-										{ key: "", value: "" }
-									]
-								});
-							}}
-						>
-							<Icon
-								name="plus_ad"
-								size={18}
-								color={Colors.pink}
-							/>
-						</TouchableWithoutFeedback>
 					</View>
 					<View
 						style={{

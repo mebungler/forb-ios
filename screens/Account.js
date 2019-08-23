@@ -164,7 +164,7 @@ class Account extends Component {
 				<View
 					style={{
 						alignItems: "center",
-						marginTop: -marginTop - 50,
+						marginTop: -marginTop - 90,
 						zIndex: 2
 					}}
 				>
@@ -216,6 +216,38 @@ class Account extends Component {
 						flex: 1
 					}}
 				>
+					<TouchableWithoutFeedback
+						onPress={() => NavigationService.navigate("Payment")}
+					>
+						<View
+							style={{
+								flexDirection: "row",
+								width: width - 30,
+								paddingTop: 15,
+								paddingBottom: 15,
+								paddingLeft: 15
+							}}
+						>
+							<View style={{ flex: 0.2 }}>
+								<Icon
+									name="payment"
+									size={25}
+									color={Colors.blue}
+								/>
+							</View>
+							<View style={{ flex: 1 }}>
+								<Text
+									style={{
+										marginLeft: 10,
+										color: Colors.blue,
+										fontSize: 24
+									}}
+								>
+									{strings.tariffs}
+								</Text>
+							</View>
+						</View>
+					</TouchableWithoutFeedback>
 					<TouchableWithoutFeedback
 						onPress={() => NavigationService.navigate("Ads")}
 					>

@@ -21,7 +21,6 @@ class Filter extends Component {
 	componentDidMount() {
 		let categoryId = this.props.navigation.getParam("categoryId");
 		api.category.filters(categoryId).then(res => {
-			console.warn(res.data);
 			this.setState({ ...this.state, filters: res.data.data });
 		});
 	}
@@ -51,6 +50,7 @@ class Filter extends Component {
 			values,
 			status
 		} = this.state;
+		let filter = this.props.navigation.getParam("filter");
 		let { changeOrientation } = this;
 		return (
 			<View style={{ flex: 1 }}>
@@ -114,16 +114,14 @@ class Filter extends Component {
 									case "input":
 										return (
 											<RoundInput
-												onTextChange={(key, val) =>
+												onTextChange={(key, val) => {
+													let filters = this.state;
+													filters[index].value = val;
 													this.setState({
 														...this.setState,
-														values: {
-															...this.state
-																.values,
-															[key]: val
-														}
-													})
-												}
+														filters
+													});
+												}}
 												style={{
 													borderColor: Colors.gray,
 													borderWidth: 1,
@@ -152,9 +150,9 @@ class Filter extends Component {
 													/>
 												)}
 												selectedValue={
-													values[el.id]
-														? values[el.id]
-														: ""
+													filters[index].value
+														? filters[index].value
+														: filters[index].name
 												}
 												placeholder={el.name}
 												data={
@@ -167,12 +165,12 @@ class Filter extends Component {
 												}
 												onValueChange={(val, i) => {
 													let {
-														values: f
+														filters: f
 													} = this.state;
-													f[el.id] = val;
+													f[index].value = val;
 													this.setState({
 														...this.state,
-														values: f
+														filters: f
 													});
 												}}
 												style={{
@@ -266,10 +264,11 @@ class Filter extends Component {
 							this.setState({ ...this.state, status: "rotate" });
 							api.product
 								.postSearch({
-									filter: filters ? filters : [],
+									filters: filters ? filters : [],
 									photo: withPhoto ? 1 : 0
 								})
 								.then(res => {
+									filter(res.data.data);
 									this.setState({
 										...this.state,
 										status: "idle"

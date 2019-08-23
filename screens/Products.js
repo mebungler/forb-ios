@@ -35,7 +35,8 @@ class Products extends Component {
 		searching: false,
 		pageIndex: 1,
 		isTile: false,
-		refreshing: false
+		refreshing: false,
+		isFiltering: false
 	};
 	componentDidMount() {
 		this.setState({ ...this.state, loading: true });
@@ -58,7 +59,7 @@ class Products extends Component {
 	};
 
 	refresh = () => {
-		this.setState({ ...this.state, refreshing: true });
+		this.setState({ ...this.state, refreshing: true, isFiltering: false });
 		let categoryId = this.props.navigation.getParam("categoryId");
 		this.props.dispatch(
 			populateProducts(categoryId, () => {
@@ -68,6 +69,9 @@ class Products extends Component {
 	};
 
 	loadMore = () => {
+		if (this.state.isFiltering) {
+			return;
+		}
 		this.setState(
 			{ ...this.state, pageIndex: this.state.pageIndex + 1 },
 			() => {
@@ -113,7 +117,10 @@ class Products extends Component {
 		);
 	};
 
-	filter = data => {};
+	filter = data => {
+		this.setState({ ...this.state, isFiltering: true });
+		this.props.dispatch(productsLoaded(data));
+	};
 
 	pickCity = e => {
 		this.setState({ ...this.state, loading: true });

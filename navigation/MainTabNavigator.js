@@ -36,6 +36,7 @@ import UserAds from "../screens/UserAds";
 import Filter from "../screens/Filter";
 import PickLocation from "../screens/PickLocation";
 import ImageView from "../screens/ImageView";
+import WebView from "../screens/WebView";
 import strings from "../localization/Strings";
 
 const chats = createStackNavigator({
@@ -155,9 +156,7 @@ const account = createStackNavigator({
 	Payment: {
 		screen: Payment,
 		navigationOptions: {
-			header: ({ navigation }) => (
-				<Header back name={"Пополнение счета"} />
-			)
+			header: ({ navigation }) => <Header back name={strings.refill} />
 		}
 	},
 	Statistics: {
@@ -264,6 +263,12 @@ export default createStackNavigator(
 		},
 		ImageView: {
 			screen: ImageView,
+			navigationOptions: {
+				header: null
+			}
+		},
+		WebView: {
+			screen: WebView,
 			navigationOptions: {
 				header: null
 			}

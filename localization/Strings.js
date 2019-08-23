@@ -2,6 +2,10 @@ import LocalizedStrings from "react-native-localization";
 
 let strings = new LocalizedStrings({
 	ru: {
+		didNotFill: "Пожалуста заполните все поля!",
+		oferta: "О приложении",
+		pickTariff: "Выберите тариф",
+		tariffs: "Тарифы",
 		remember: "Запомнить",
 		attention: "Внимание!",
 		yes: "Да",
@@ -111,6 +115,10 @@ let strings = new LocalizedStrings({
 		all: "Все"
 	},
 	uz: {
+		didNotFill: "Iltimos hamma maydonlarni to`ldiring!",
+		oferta: "Dastur haqida",
+		pickTariff: "Tarifni tanlang",
+		tariffs: "Tariflar",
 		remember: "Eslab qolish",
 		attention: "Diqqat!",
 		yes: "Ha",
@@ -214,6 +222,10 @@ let strings = new LocalizedStrings({
 		all: "Barchasi"
 	},
 	en: {
+		didNotFill: "Please fill all fields!",
+		oferta: "About application",
+		pickTariff: "Pick tariff",
+		tariffs: "Tariffs",
 		remember: "Remember",
 		attention: "Attention!",
 		yes: "Yes",

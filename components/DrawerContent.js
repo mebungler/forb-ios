@@ -5,7 +5,8 @@ import {
 	Text,
 	TouchableWithoutFeedback,
 	SafeAreaView,
-	Image
+	Image,
+	Linking
 } from "react-native";
 
 import { connect } from "react-redux";
@@ -24,12 +25,14 @@ import Colors from "../constants/Colors";
 
 import DrawerItem from "./DrawerItem";
 
-import { urlResolve } from "../api/api";
+import api, { urlResolve } from "../api/api";
 
 import logo from "../assets/images/logo.png";
 import strings from "../localization/Strings";
 
 class DrawerContent extends Component {
+	state = { phone: "+998 99 111 11 11", source: "" };
+
 	changeLanguage = language => {
 		strings.setLanguage(language);
 		this.props.dispatch(
@@ -41,6 +44,17 @@ class DrawerContent extends Component {
 			)
 		);
 	};
+
+	componentDidMount() {
+		api.main.phone().then(res => {
+			this.setState({ ...this.state, phone: res.data.data.content });
+			api.main.oferta().then(res => {
+				console.warn(res.data.data);
+				this.setState({ ...this.state, source: res.data.data.content });
+			});
+		});
+	}
+
 	render() {
 		let { chats, user } = this.props;
 		let isAuthorized = Object.keys(user).length > 1;
@@ -169,6 +183,42 @@ class DrawerContent extends Component {
 							NavigationService.navigate("Services");
 						}}
 					/>
+					<DrawerItem
+						text={strings.tariffs}
+						iconName="wallet"
+						onPress={() => {
+							NavigationService.toggleDrawer();
+							NavigationService.navigate("Payment");
+						}}
+					/>
+					<DrawerItem
+						text={strings.oferta}
+						iconName="text-document"
+						onPress={() => {
+							NavigationService.toggleDrawer();
+							NavigationService.navigate("WebView", {
+								source: this.state.source,
+								title: strings.oferta
+							});
+						}}
+					/>
+					<DrawerItem
+						text={
+							this.state.phone.indexOf("+") === -1
+								? `+${this.state.phone}`
+								: this.state.phone
+						}
+						iconName="seller"
+						onPress={() => {
+							Linking.openURL(
+								`tel:${
+									this.state.phone.indexOf("+") === -1
+										? `+${this.state.phone}`
+										: this.state.phone
+								}`
+							);
+						}}
+					/>
 				</View>
 				<View
 					style={{
@@ -182,8 +232,10 @@ class DrawerContent extends Component {
 					<View
 						style={{
 							flexDirection: "row",
-							paddingBottom: 15,
-							justifyContent: "space-around"
+							paddingBottom: 0,
+							justifyContent: "space-around",
+							paddingLeft: 30,
+							paddingRight: 30
 						}}
 					>
 						<TouchableWithoutFeedback

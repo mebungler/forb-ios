@@ -57,6 +57,12 @@ let packageData = data => {
 			});
 			continue;
 		}
+		if (key === "filters") {
+			data[key].forEach((e, index) => {
+				form.append(`filter[${e.id}]`, e.value);
+			});
+			continue;
+		}
 		form.append(key, data[key]);
 	}
 	return form;
@@ -93,6 +99,21 @@ export default {
 		getBanner: () =>
 			axios
 				.get(url + "/main/slider")
+				.then(res => res)
+				.catch(({ response }) => response),
+		getTariff: () =>
+			axios
+				.get(url + "/main/tariff")
+				.then(res => res)
+				.catch(({ response }) => response),
+		phone: () =>
+			axios
+				.get(url + "/main/phone")
+				.then(res => res)
+				.catch(({ response }) => response),
+		oferta: () =>
+			axios
+				.get(url + "/main/oferta")
 				.then(res => res)
 				.catch(({ response }) => response)
 	},
@@ -135,12 +156,6 @@ export default {
 					}
 				})
 				.then(res => {
-					console.warn("loll1");
-					return res;
-				})
-				.catch(res => {
-					console.warn("sloll");
-					console.warn(res.response);
 					return res;
 				}),
 		getActiveAds: () =>

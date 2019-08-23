@@ -67,6 +67,7 @@ class RoundInput extends Component {
 			name,
 			onRightIconPress = () => {},
 			required,
+			containerStyle,
 			...rest
 		} = this.props;
 		let { placeholder } = this.state;
@@ -107,7 +108,8 @@ class RoundInput extends Component {
 							borderRadius: 30,
 							padding: 0,
 							justifyContent: "center",
-							width
+							width,
+							...containerStyle
 						},
 						small && { margin: 0 },
 						full && {

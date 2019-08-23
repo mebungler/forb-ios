@@ -148,7 +148,8 @@ export class Header extends React.Component {
 			openDrawer = () => {
 				NavigationService.toggleDrawer();
 			},
-			main
+			main,
+			noMenu
 		} = this.props;
 		if (main)
 			return (
@@ -188,6 +189,10 @@ export class Header extends React.Component {
 					</TouchableWithoutFeedback>
 				</View>
 			);
+
+		if (noMenu) {
+			return null;
+		}
 		return (
 			<TouchableWithoutFeedback
 				onPress={() => {
