@@ -155,15 +155,16 @@ const Banner = ({
 								}}
 								style={getImageStyle()}
 							>
-								{type === "default" && (
-									<View
-										style={{
-											...StyleSheet.absoluteFillObject,
-											backgroundColor: Colors.black,
-											opacity: 0.3
-										}}
-									/>
-								)}
+								{type === "default" ||
+									(type === "notDefault" && (
+										<View
+											style={{
+												...StyleSheet.absoluteFillObject,
+												backgroundColor: Colors.black,
+												opacity: 0.5
+											}}
+										/>
+									))}
 							</ImageBackground>
 						</TouchableWithoutFeedback>
 					))}

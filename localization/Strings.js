@@ -2,6 +2,10 @@ import LocalizedStrings from "react-native-localization";
 
 let strings = new LocalizedStrings({
 	ru: {
+		invalidEmail: "Неверный e-mail",
+		confirmPassword: "Подтверждение пароля",
+		passwordsDoNotMatch: "Пароля не совпадают!",
+		collapse: "Свернуть",
 		didNotFill: "Пожалуста заполните все поля!",
 		oferta: "О приложении",
 		pickTariff: "Выберите тариф",
@@ -115,6 +119,10 @@ let strings = new LocalizedStrings({
 		all: "Все"
 	},
 	uz: {
+		invalidEmail: "Noto`g`ri e-mail",
+		confirmPassword: "Parolni tasdiqlash",
+		passwordsDoNotMatch: "Parollar bir xil emas!",
+		collapse: "Yashirish",
 		didNotFill: "Iltimos hamma maydonlarni to`ldiring!",
 		oferta: "Dastur haqida",
 		pickTariff: "Tarifni tanlang",
@@ -222,6 +230,10 @@ let strings = new LocalizedStrings({
 		all: "Barchasi"
 	},
 	en: {
+		invalidEmail: "Invalid email",
+		confirmPassword: "Confirm password",
+		passwordsDoNotMatch: "Passwords do not match!",
+		collapse: "Collapse",
 		didNotFill: "Please fill all fields!",
 		oferta: "About application",
 		pickTariff: "Pick tariff",

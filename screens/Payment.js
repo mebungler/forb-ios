@@ -5,7 +5,8 @@ import {
 	View,
 	Text,
 	Image,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	Linking
 } from "react-native";
 import Colors from "../constants/Colors";
 import Icon from "../services/IconService";
@@ -249,11 +250,11 @@ class Payment extends Component {
 						bold
 						big
 						onPress={() =>
-							this.props.navigation.navigate("WebView", {
-								url: `http://forb.uz/payment?id=${
+							Linking.openURL(
+								`http://forb.uz/payment?id=${
 									payments[payment].id
 								}&token=${StorageService.getState().token}`
-							})
+							)
 						}
 						text={strings.pay}
 					/>

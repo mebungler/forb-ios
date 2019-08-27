@@ -175,23 +175,14 @@ class RoundInput extends Component {
 						>
 							<Input
 								multiline={multiline}
-								placeholder={placeholder}
+								placeholder={focused ? "" : placeholder}
 								value={value}
-								onBlur={() =>
-									this.setState({
-										...this.state,
-										focused: false,
-										placeholder: this.props.placeholder
-									})
-								}
 								onFocus={() =>
 									this.setState({
 										...this.state,
-										focused: true,
-										placeholder: ""
+										focused: true
 									})
 								}
-								{...rest}
 								placeholderTextColor={
 									transparent
 										? Colors.lightGray
@@ -218,13 +209,6 @@ class RoundInput extends Component {
 											iconState: valid ? 2 : 1
 										});
 									}
-									if (email || password) {
-										onTextChange(
-											email ? "email" : "password",
-											e
-										);
-										return;
-									}
 									onTextChange(name, e);
 								}}
 								secureTextEntry={password ? true : false}
@@ -241,7 +225,7 @@ class RoundInput extends Component {
 						)}
 					</View>
 				</Card>
-				{error && (
+				{error && error[name] && (
 					<Text
 						style={{
 							color: Colors.pink,

@@ -183,14 +183,16 @@ class DrawerContent extends Component {
 							NavigationService.navigate("Services");
 						}}
 					/>
-					<DrawerItem
-						text={strings.tariffs}
-						iconName="wallet"
-						onPress={() => {
-							NavigationService.toggleDrawer();
-							NavigationService.navigate("Payment");
-						}}
-					/>
+					{isAuthorized && (
+						<DrawerItem
+							text={strings.tariffs}
+							iconName="wallet"
+							onPress={() => {
+								NavigationService.toggleDrawer();
+								NavigationService.navigate("Payment");
+							}}
+						/>
+					)}
 					<DrawerItem
 						text={strings.oferta}
 						iconName="text-document"

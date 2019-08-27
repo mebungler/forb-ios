@@ -34,10 +34,24 @@ class Register extends Component {
 		address: "",
 		city: "",
 		branch: "",
-		error: null,
-		password: ""
+		error: {},
+		password: "",
+		confirmPassword: ""
 	};
+
+	validate = txt => {
+		let { email } = this.props;
+		let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		if (email) return re.test(String(txt).toLowerCase());
+		if (txt.length > 4) return true;
+		else return false;
+	};
+
 	onRegister = () => {
+		if (Object.keys(this.state.error).length > 0) {
+			this.setState({ ...this.state, status: "disabled" });
+			return;
+		}
 		this.setState({ status: "rotate" });
 		let {
 			phone,
@@ -96,8 +110,11 @@ class Register extends Component {
 				} else {
 					this.setState({
 						...this.state,
-						status: "idle",
-						error: res.data.errors
+						status: "disabled",
+						error: {
+							...this.state.errors,
+							...res.response.data.errors
+						}
 					});
 				}
 			})
@@ -200,7 +217,11 @@ class Register extends Component {
 					<RoundInput
 						error={error}
 						onTextChange={(key, val) => {
-							this.setState({ ...this.setState, [key]: val });
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							});
 						}}
 						leftIcon={() => (
 							<Icon name="name" size={24} color="#c4c4c4" />
@@ -220,7 +241,11 @@ class Register extends Component {
 					<RoundInput
 						error={error}
 						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							})
 						}
 						leftIcon={() => (
 							<Icon name="phone-1" size={24} color="#c4c4c4" />
@@ -240,9 +265,22 @@ class Register extends Component {
 					/>
 					<RoundInput
 						error={error}
-						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
-						}
+						onTextChange={(key, val) => {
+							let isValid = this.validate(val);
+							let err = error;
+							if (!isValid) {
+								err[key] = strings.invalidEmail;
+							} else {
+								let { email, ...rest } = error;
+								err = rest;
+							}
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle",
+								error: { ...err }
+							});
+						}}
 						leftIcon={() => (
 							<Icon name="mail" size={18} color="#c4c4c4" />
 						)}
@@ -262,7 +300,11 @@ class Register extends Component {
 					<RoundInput
 						error={error}
 						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							})
 						}
 						leftIcon={() => (
 							<Icon name="lock" size={18} color="#c4c4c4" />
@@ -283,8 +325,48 @@ class Register extends Component {
 					/>
 					<RoundInput
 						error={error}
+						onTextChange={(key, val) => {
+							console.warn(this.state.password);
+							let { confirmPassword = "", ...rest } = error;
+							this.setState({
+								...this.state,
+								[key]: val,
+								error:
+									val !== this.state.password
+										? {
+												...error,
+												confirmPassword:
+													strings.passwordsDoNotMatch
+										  }
+										: { ...rest },
+								status: "idle"
+							});
+						}}
+						leftIcon={() => (
+							<Icon name="lock" size={18} color="#c4c4c4" />
+						)}
+						simple
+						placeholder={strings.confirmPassword}
+						name="confirmPassword"
+						keyboardType="password"
+						required
+						password
+						rightIcon={() => (
+							<FontAwesome
+								name="asterisk"
+								size={12}
+								color={Colors.pink}
+							/>
+						)}
+					/>
+					<RoundInput
+						error={error}
 						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							})
 						}
 						leftIcon={() => (
 							<Icon
@@ -308,7 +390,11 @@ class Register extends Component {
 					<RoundInput
 						error={error}
 						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							})
 						}
 						leftIcon={() => (
 							<Icon
@@ -324,7 +410,11 @@ class Register extends Component {
 					<RoundInput
 						error={error}
 						onTextChange={(key, val) =>
-							this.setState({ ...this.setState, [key]: val })
+							this.setState({
+								...this.setState,
+								[key]: val,
+								status: "idle"
+							})
 						}
 						leftIcon={() => (
 							<Icon name="adress" size={24} color="#c4c4c4" />

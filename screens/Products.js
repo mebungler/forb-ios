@@ -231,7 +231,7 @@ class Products extends Component {
 						flexDirection: "row",
 						justifyContent: "flex-end",
 						alignItems: "flex-end",
-						bottom: 15,
+						bottom: 30,
 						right: 15
 					}}
 				>

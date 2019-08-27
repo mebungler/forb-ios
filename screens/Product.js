@@ -248,29 +248,31 @@ class Product extends Component {
 										: strings.finalPrice}
 								</Text>
 							</View>
-							<TouchableWithoutFeedback
-								onPress={() =>
-									this.setState({
-										...this.state,
-										priceVisible: !priceVisible
-									})
-								}
-							>
-								<Icon
-									color={Colors.pink}
-									size={30}
-									name="chevron"
-									style={{
-										transform: [
-											{
-												rotate: !priceVisible
-													? "0deg"
-													: "180deg"
-											}
-										]
-									}}
-								/>
-							</TouchableWithoutFeedback>
+							{price && price_d ? (
+								<TouchableWithoutFeedback
+									onPress={() =>
+										this.setState({
+											...this.state,
+											priceVisible: !priceVisible
+										})
+									}
+								>
+									<Icon
+										color={Colors.pink}
+										size={30}
+										name="chevron"
+										style={{
+											transform: [
+												{
+													rotate: !priceVisible
+														? "0deg"
+														: "180deg"
+												}
+											]
+										}}
+									/>
+								</TouchableWithoutFeedback>
+							) : null}
 						</View>
 						<Border fill />
 						<View
@@ -306,55 +308,40 @@ class Product extends Component {
 							{title}
 						</Text>
 
-						<Border fill />
-						{properties &&
-							properties.map((e, key) => (
-								<View
-									{...{ key }}
-									style={{
-										flexDirection: "row",
-										justifyContent: "space-between",
-										marginTop: 15
-									}}
-								>
-									<Text
+						{properties && (
+							<React.Fragment>
+								<Border fill />
+								{properties.map((e, key) => (
+									<View
+										{...{ key }}
 										style={{
-											color: Colors.darkGray,
-											fontSize: 18,
-											fontWeight: "bold"
+											flexDirection: "row",
+											justifyContent: "space-between",
+											marginTop: 15
 										}}
 									>
-										{e.name}
-									</Text>
-									<Text
-										style={{
-											color: Colors.black,
-											fontSize: 18,
-											fontWeight: "bold"
-										}}
-									>
-										{e.value}
-									</Text>
-								</View>
-							))}
-						<Border fill style={{ marginTop: 15 }} />
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								marginTop: 15
-							}}
-						>
-							<Text
-								style={{
-									fontWeight: "bold",
-									color: Colors.pink
-								}}
-							>
-								{strings.showMore}
-							</Text>
-							<Icon name="chevrondown" color={Colors.pink} />
-						</View>
+										<Text
+											style={{
+												color: Colors.darkGray,
+												fontSize: 18,
+												fontWeight: "bold"
+											}}
+										>
+											{e.name}
+										</Text>
+										<Text
+											style={{
+												color: Colors.black,
+												fontSize: 18,
+												fontWeight: "bold"
+											}}
+										>
+											{e.value}
+										</Text>
+									</View>
+								))}
+							</React.Fragment>
+						)}
 					</View>
 					<Text
 						style={{
@@ -447,9 +434,23 @@ class Product extends Component {
 										color: Colors.pink
 									}}
 								>
-									{strings.showMore}
+									{contentVisible
+										? strings.collapse
+										: strings.showMore}
 								</Text>
-								<Icon name="chevrondown" color={Colors.pink} />
+								<Icon
+									name="chevrondown"
+									color={Colors.pink}
+									style={{
+										transform: [
+											{
+												rotate: contentVisible
+													? "180deg"
+													: "0deg"
+											}
+										]
+									}}
+								/>
 							</View>
 						</TouchableWithoutFeedback>
 					</View>
