@@ -4,13 +4,9 @@ import Icon from "../services/IconService";
 import Colors from "../constants/Colors";
 import NavigationService from "../services/NavigationService";
 
-const Subcategory = ({ item }) => {
+const Subcategory = ({ item, onPress }) => {
 	return (
-		<TouchableWithoutFeedback
-			onPress={() =>
-				NavigationService.navigate("Products", { categoryId: item.id })
-			}
-		>
+		<TouchableWithoutFeedback onPress={() => onPress(item.id)}>
 			<View style={{ flexDirection: "row", padding: 15 }}>
 				<View
 					style={{

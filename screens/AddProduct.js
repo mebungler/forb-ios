@@ -46,11 +46,11 @@ class AddProduct extends Component {
 		gallery: [],
 		responsible_person: "",
 		photo: "",
-		email: "",
+		email: this.props.user.email,
 		city_id: -1,
 		status: "idle",
 		content: "",
-		phone: "",
+		phone: this.props.user.phone,
 		lng: 0,
 		lat: 0,
 		isMine: null,
@@ -908,6 +908,7 @@ class AddProduct extends Component {
 									color={Colors.pink}
 								/>
 							)}
+							value={this.state.phone}
 						/>
 						<RoundInput
 							onTextChange={(key, val) =>
@@ -919,6 +920,7 @@ class AddProduct extends Component {
 							leftIcon={() => (
 								<Icon name="mail" size={18} color="#c4c4c4" />
 							)}
+							value={this.state.email}
 							simple
 							placeholder={strings.email}
 							wider
@@ -978,7 +980,11 @@ class AddProduct extends Component {
 	}
 }
 
-const mapStateToProps = ({ cities, categories }) => ({ cities, categories });
+const mapStateToProps = ({ cities, categories, user }) => ({
+	cities,
+	categories,
+	user
+});
 
 export default connect(mapStateToProps)(AddProduct);
 

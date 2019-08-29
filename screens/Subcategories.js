@@ -11,18 +11,26 @@ import SubcategoryItem from "./SubcategoryItem";
 import Colors from "../constants/Colors";
 import api from "../api/api";
 import strings from "../localization/Strings";
+import NavigationService from "../services/NavigationService";
 
 class Subcategories extends Component {
 	state = { data: [] };
 	componentDidMount() {
-		let item = this.props.navigation.getParam("item");
-		api.category.subCategories(item.id).then(res =>
+		this.populate();
+	}
+	populate = (id = this.props.navigation.getParam("item").id) => {
+		this.setState({ data: [] });
+		api.category.subCategories(id).then(res => {
+			if (!res.data.data || res.data.data.length <= 0) {
+				NavigationService.navigate("Products", { categoryId: id });
+				return;
+			}
 			this.setState({
 				...this.state,
-				data: [{ name: strings.all, id: item.id }, ...res.data.data]
-			})
-		);
-	}
+				data: [{ name: strings.all, id: id }, ...res.data.data]
+			});
+		});
+	};
 	render() {
 		let item = this.props.navigation.getParam("item");
 		let { data } = this.state;
@@ -36,7 +44,9 @@ class Subcategories extends Component {
 					contentContainerStyle={{
 						paddingBottom: 15
 					}}
-					renderItem={SubcategoryItem}
+					renderItem={({ item: child }) => (
+						<SubcategoryItem item={child} onPress={this.populate} />
+					)}
 					keyExtractor={e => e.id.toString()}
 					showsVerticalScrollIndicator={false}
 					ListEmptyComponent={() => (

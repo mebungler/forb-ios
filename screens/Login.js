@@ -33,6 +33,8 @@ class Login extends React.Component {
 	};
 	login = () => {
 		let { phone, password } = this.state;
+		console.warn(phone);
+		console.warn(password);
 		if (phone === "" || password === "") {
 			this.setState({
 				...this.state,
@@ -52,7 +54,7 @@ class Login extends React.Component {
 				} else {
 					this.setState({
 						...this.state,
-						error: res.data.errors,
+						error: res.response.data.errors,
 						status: "idle"
 					});
 				}
@@ -112,6 +114,7 @@ class Login extends React.Component {
 								keyboardType="phone-pad"
 							/>
 							<RoundInput
+								name="password"
 								transparent
 								onTextChange={(key, val) =>
 									this.setState({
