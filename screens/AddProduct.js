@@ -173,6 +173,12 @@ class AddProduct extends Component {
 					);
 					return;
 				}
+				Alert.alert(
+					strings.attention,
+					strings.complete,
+					[{ text: "OK" }],
+					{ cancelable: true }
+				);
 				this.props.navigation.navigate("Products");
 			})
 			.catch(res => {

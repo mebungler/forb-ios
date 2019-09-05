@@ -104,7 +104,7 @@ class RoundInput extends Component {
 							flexDirection: "row",
 							borderWidth: transparent ? 1 : 0,
 							borderColor: Colors.white,
-							height: small ? 40 : 50,
+							height: small ? 45 : 50,
 							borderRadius: 30,
 							padding: 0,
 							justifyContent: "center",
@@ -203,12 +203,6 @@ class RoundInput extends Component {
 									style
 								]}
 								onChangeText={e => {
-									if (email || password) {
-										let valid = validate(e);
-										this.setState({
-											iconState: valid ? 2 : 1
-										});
-									}
 									onTextChange(name, e);
 								}}
 								secureTextEntry={password ? true : false}

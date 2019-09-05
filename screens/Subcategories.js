@@ -16,12 +16,16 @@ import NavigationService from "../services/NavigationService";
 class Subcategories extends Component {
 	state = { data: [] };
 	componentDidMount() {
-		this.populate();
+		this.populate(this.props.navigation.getParam("item").id, true);
 	}
-	populate = (id = this.props.navigation.getParam("item").id) => {
+	populate = (id = this.props.navigation.getParam("item").id, initial) => {
 		this.setState({ data: [] });
 		api.category.subCategories(id).then(res => {
-			if (!res.data.data || res.data.data.length <= 0) {
+			if (
+				!res.data.data ||
+				res.data.data.length <= 0 ||
+				(!initial && id === this.props.navigation.getParam("item").id)
+			) {
 				NavigationService.navigate("Products", { categoryId: id });
 				return;
 			}

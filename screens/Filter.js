@@ -257,8 +257,7 @@ class Filter extends Component {
 						color={Colors.blue}
 						status={status}
 						fill
-						mediumSize
-						big
+						medium
 						animated
 						onPress={() => {
 							this.setState({ ...this.state, status: "rotate" });

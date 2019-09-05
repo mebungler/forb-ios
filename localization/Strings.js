@@ -2,6 +2,8 @@ import LocalizedStrings from "react-native-localization";
 
 let strings = new LocalizedStrings({
 	ru: {
+		complete:
+			"Ваша заявка отправлено модераторам. Оно будет опубликована в течение дня.",
 		invalidEmail: "Неверный e-mail",
 		confirmPassword: "Подтверждение пароля",
 		passwordsDoNotMatch: "Пароля не совпадают!",
@@ -119,6 +121,8 @@ let strings = new LocalizedStrings({
 		all: "Все"
 	},
 	uz: {
+		complete:
+			"Sizning e`loningiz qabul qilindi va moderatorlarga jo`natildi. E`loningiz bir ish kuni davomida partalimizda paydo boladi.",
 		invalidEmail: "Noto`g`ri e-mail",
 		confirmPassword: "Parolni tasdiqlash",
 		passwordsDoNotMatch: "Parollar bir xil emas!",
@@ -230,6 +234,8 @@ let strings = new LocalizedStrings({
 		all: "Barchasi"
 	},
 	en: {
+		complete:
+			"Your request has sent to moderators. It will be posted during one working day.",
 		invalidEmail: "Invalid email",
 		confirmPassword: "Confirm password",
 		passwordsDoNotMatch: "Passwords do not match!",

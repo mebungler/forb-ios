@@ -236,9 +236,13 @@ class Products extends Component {
 					}}
 				>
 					<TouchableWithoutFeedback
-						onPress={() =>
-							this.props.navigation.navigate("AddProduct")
-						}
+						onPress={() => {
+							let isAuthenticated =
+								Object.keys(this.props.user).length > 1;
+							this.props.navigation.navigate(
+								isAuthenticated ? "AddProduct" : "Login"
+							);
+						}}
 					>
 						<View
 							style={{
@@ -263,10 +267,11 @@ class Products extends Component {
 	}
 }
 
-const mapStateToProps = ({ products, favorites, cities }) => ({
+const mapStateToProps = ({ products, favorites, cities, user }) => ({
 	products,
 	favorites,
-	cities
+	cities,
+	user
 });
 
 export default connect(mapStateToProps)(Products);
